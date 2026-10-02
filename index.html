@@ -399,14 +399,14 @@ import {
   onSnapshot as fsOnSnapshot, writeBatch as fsWriteBatch
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
-// 創作管理サイト（sousaku-labo）と同じ Firebase プロジェクトを使う
+// 卒制管理用の Firebase プロジェクト（sotsuseikanri）
 const firebaseConfig = {
-  apiKey: "AIzaSyAkoqpr_NQWHLACbjDWscyz78edipjq9lU",
-  authDomain: "sousaku-labo.firebaseapp.com",
-  projectId: "sousaku-labo",
-  storageBucket: "sousaku-labo.firebasestorage.app",
-  messagingSenderId: "319541429312",
-  appId: "1:319541429312:web:461791e540a8b5c24d4ba5"
+  apiKey: "AIzaSyDFzY4yS2OryHuYjB2mw43fJIhJntS2CnA",
+  authDomain: "sotsuseikanri.firebaseapp.com",
+  projectId: "sotsuseikanri",
+  storageBucket: "sotsuseikanri.firebasestorage.app",
+  messagingSenderId: "968352795383",
+  appId: "1:968352795383:web:8ce6d7ebda96dbbf50a1f2"
 };
 const fbApp = initializeApp(firebaseConfig);
 const fbAuth = getAuth(fbApp);
@@ -434,7 +434,7 @@ onAuthStateChanged(fbAuth, async (user)=>{
   appEl.hidden=true; gateEl.hidden=false; deniedBox.hidden=true; loginBtn.hidden=true;
   if(!user){ gateMsg.textContent='このボードを使うには Google アカウントでログインしてください。'; loginBtn.hidden=false; return; }
   gateMsg.textContent='確認中…';
-  try{ await fsGetDoc(fsDoc(fbDb, 'allowedEmails', user.email)); }
+  try{ const snap=await fsGetDoc(fsDoc(fbDb, 'allowedEmails', user.email)); if(!snap.exists()) throw new Error('not allowed'); }
   catch(err){ deniedEmail.textContent=user.email; deniedBox.hidden=false; gateMsg.textContent=''; return; }
   allowed=true; gateEl.hidden=true; appEl.hidden=false;
   document.getElementById('userEmail').textContent=user.email;
