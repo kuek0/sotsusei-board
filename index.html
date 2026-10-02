@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>風神雷神 卒制ボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+2:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: 色＝使うソフト（Maya 水色／MD オレンジ／ZBrush 紫）、担当＝バー横の記号。上から 概要 → 工程表 → タスク → 懸念 の一段組み */
+:root{
+  --bg:#EFEFEF; --surface:#FBFBFB; --ink:#202020; --muted:#5F5F5F; --line:#D6D6D6; --soft:#E5E5E5;
+  --maya:#2F9FD0; --md:#E2772A; --zb:#7A55C7; --out:#5B6672; --gen:#8F8F8F; --unity:#C2407A; --accent:#1F6F96;
+  --todo:#808080; --doing:#B86E0B; --done:#2E7D4F; --high:#B03636; --mid:#B86E0B; --low:#5F5F5F;
+  --f-display:"M PLUS 2","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --f-body:"M PLUS 2","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --f-mono:"M PLUS 2","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --day:7px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141414; --surface:#1B1B1B; --ink:#E8E8E8; --muted:#9E9E9E; --line:#303030; --soft:#252525;
+  --maya:#6CC4EC; --md:#F2994E; --zb:#A88AEC; --out:#9DAAB7; --gen:#808080; --unity:#EC7FAE; --accent:#6CC4EC;
+  --todo:#919191; --doing:#E39B3C; --done:#5DBA80; --high:#E06A6A; --mid:#E39B3C; --low:#9E9E9E; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141414; --surface:#1B1B1B; --ink:#E8E8E8; --muted:#9E9E9E; --line:#303030; --soft:#252525;
+  --maya:#6CC4EC; --md:#F2994E; --zb:#A88AEC; --out:#9DAAB7; --gen:#808080; --unity:#EC7FAE; --accent:#6CC4EC;
+  --todo:#919191; --doing:#E39B3C; --done:#5DBA80; --high:#E06A6A; --mid:#E39B3C; --low:#9E9E9E; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.65}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:28px 64px;display:grid;gap:40px}
+h1,h2{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:.02em}
+h1{font-size:clamp(26px,4.4vw,38px);font-weight:800;line-height:1.25}
+h2{font-size:22px;font-weight:800}
+.eyebrow{font-size:12px;letter-spacing:.14em;color:var(--muted);font-weight:700}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+section{display:grid;gap:16px;min-width:0}
+.sec-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;border-bottom:1px solid var(--line);padding-bottom:8px}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* header */
+header{display:grid;gap:18px}
+.title-row{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.duo{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.stat{background:var(--surface);padding:14px 16px;display:grid;gap:2px;min-width:0}
+.stat b{font-family:var(--f-mono);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat span{font-size:12px;color:var(--muted)}
+.bar{height:6px;background:var(--soft);border-radius:3px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--done);width:0;transition:width .4s}
+
+/* upcoming */
+.upcoming{display:grid;gap:6px}
+.up-item{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:baseline;padding:8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.up-item .mono{font-size:13px}
+.up-item.late .mono{color:var(--high);font-weight:600}
+
+/* gantt */
+.gantt-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.gantt{position:relative;min-width:max-content;padding-bottom:8px}
+.g-row{display:flex;align-items:center;height:30px}
+.g-label{position:sticky;left:0;z-index:2;width:168px;flex:none;padding:0 10px;font-size:12.5px;background:var(--surface);border-right:1px solid var(--line);height:100%;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-track{position:relative;height:100%}
+.g-bar{position:absolute;top:7px;height:16px;border-radius:3px}
+.g-bar.maya{background:var(--maya)} .g-bar.md{background:var(--md)} .g-bar.zb{background:var(--zb)} .g-bar.out{background:var(--out)} .g-bar.gen{background:var(--gen)} .g-bar.event{background:var(--ink)}
+.g-bar.opt-maya{border:1.5px dashed var(--maya)} .g-bar.opt-gen{border:1.5px dashed var(--gen)}
+.g-who{display:inline-block;height:18px;line-height:16px;padding:0 6px;font-size:10.5px;font-weight:700;border-radius:9px;white-space:nowrap;border:1px solid var(--muted);color:var(--muted);background:var(--surface)}
+.g-who.pair{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.g-who.help{border-style:dashed;color:var(--ink)}
+.g-after{position:absolute;top:6px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.g-date{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.g-bar.unity{background:var(--unity)}
+.ph-mark{width:10px;height:10px;border-radius:2px;display:inline-block;align-self:center}
+.g-bar.light{background:repeating-linear-gradient(90deg,var(--muted) 0 6px,transparent 6px 10px);height:4px;top:13px;opacity:.7}
+.g-bar.opt-maya,.g-bar.opt-gen{background:transparent}
+.g-months .g-track span{position:absolute;top:6px;font-size:11px;color:var(--muted);font-family:var(--f-mono);padding-left:4px;border-left:1px solid var(--line);height:22px}
+.g-class .g-track i{position:absolute;top:9px;width:5px;height:12px;border-radius:1px}
+.g-class i.thu{background:var(--muted)} .g-class i.fri{background:var(--ink)}
+.g-ms{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed var(--high);z-index:1;pointer-events:none}
+.g-ms.today{border-left:2px solid var(--ink)}
+.g-ms em{position:absolute;bottom:2px;left:4px;font-style:normal;font-size:10.5px;white-space:nowrap;color:var(--high);background:var(--surface);padding:0 3px;font-family:var(--f-mono)}
+.g-ms.today em{color:var(--ink);bottom:auto;top:2px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:16px;height:8px;border-radius:2px;display:inline-block}
+
+/* class days */
+.classes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.cd{padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);display:grid;gap:2px;font-size:12.5px}
+.cd .mono{font-size:13px;font-weight:600}
+.cd.past{opacity:.45}
+.cd.next{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+details.note{font-size:13.5px;color:var(--muted)}
+details.note summary{cursor:pointer;color:var(--ink)}
+
+/* tasks */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:13px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:5px 12px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.toolbar label{display:inline-flex;gap:6px;align-items:center}
+.phase{display:grid;gap:6px}
+.phase h3{margin:10px 0 2px;font-size:15px;font-weight:700;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.phase h3 small{font-weight:400;color:var(--muted);font-family:var(--f-mono);font-size:12px}
+.task{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px;align-items:center;padding:8px 10px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.task.done .t-title{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.t-main{min-width:0}
+.t-title{font-weight:500;overflow-wrap:anywhere}
+.t-note{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.st{border:1px solid currentColor;background:transparent;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;min-width:64px}
+.st.todo{color:var(--todo)} .st.doing{color:var(--doing)} .st.done{color:var(--done);background:color-mix(in srgb,var(--done) 12%,transparent)}
+.due{font-size:12.5px;color:var(--muted)}
+.due.late{color:var(--high);font-weight:600}
+.task select{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:2px 4px;font-size:12.5px}
+.del{border:0;background:none;color:var(--muted);font-size:12px;padding:2px 4px}
+.del.arm{color:var(--high);font-weight:700}
+.empty{padding:14px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);font-size:13.5px}
+form.add{display:grid;grid-template-columns:2fr 1.2fr .8fr .9fr auto;gap:8px;padding:12px;border:1px solid var(--line);border-radius:6px;background:var(--soft)}
+form.add input,form.add select{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:6px 8px;min-width:0;width:100%}
+form.add button{border:0;background:var(--accent);color:var(--surface);border-radius:4px;padding:6px 14px;font-weight:700}
+.members{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:13px}
+.members input{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:4px 8px;width:9em}
+.notice{font-size:13px;color:var(--muted)}
+
+/* decisions */
+.exhibit{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:grid;gap:4px;align-content:start}
+.ex .k{font-size:11.5px;letter-spacing:.12em;color:var(--muted);font-weight:700}
+.ex h4{margin:0;font-size:16px}
+.ex p{margin:0;font-size:13.5px;color:var(--muted)}
+.decisions{display:grid;border:1px solid var(--line);border-radius:6px;background:var(--surface);overflow:hidden}
+.dec{display:grid;grid-template-columns:72px 1fr;gap:14px;padding:12px 16px;border-top:1px solid var(--line)}
+.dec:first-child{border-top:0}
+.dec .tag{font-size:11.5px;font-weight:700;color:var(--muted);padding-top:2px}
+.dec h4{margin:0;font-size:14.5px}
+.dec p{margin:2px 0 0;font-size:13px;color:var(--muted);max-width:68ch}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 18px}
+.box h4{margin:0 0 8px;font-size:15px}
+.box ul{margin:0;padding-left:1.2em;display:grid;gap:4px;font-size:13.5px}
+
+/* flow */
+.flow{display:grid;gap:8px}
+.lane{display:grid;grid-template-columns:128px 1fr;gap:12px;align-items:start;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.lane-h{font-weight:700;font-size:13.5px;line-height:1.4}
+.lane-h small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.steps{display:flex;flex-wrap:wrap;align-items:center;gap:6px 4px;min-width:0}
+.step{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:4px;background:var(--soft);font-size:13px;border-left:4px solid var(--gen)}
+.step.maya{border-left-color:var(--maya)} .step.md{border-left-color:var(--md)} .step.zb{border-left-color:var(--zb)} .step.out{border-left-color:var(--out)} .step.unity{border-left-color:var(--unity)}
+.step.done{color:var(--muted);text-decoration:line-through}
+.step em{font-style:normal;font-size:10.5px;font-weight:700;color:var(--doing);border:1px solid currentColor;border-radius:999px;padding:0 6px;text-decoration:none}
+.arr{color:var(--muted);font-size:12px}
+.tp{font-size:11.5px;font-weight:700;color:var(--ink);white-space:nowrap}
+.exp{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px}
+.xp{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:grid;gap:6px;align-content:start}
+.xp-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:700;font-size:14px}
+.xp p{margin:0;font-size:13px;color:var(--muted)}
+.lv{font-size:11px;font-weight:700;padding:0 8px;border-radius:999px;border:1px solid currentColor;line-height:1.6}
+.lv.new{color:var(--high)} .lv.low{color:var(--mid)} .lv.ok{color:var(--done)}
+.tests{display:grid;border:1px solid var(--line);border-radius:6px;background:var(--surface);overflow:hidden}
+.tst{display:grid;grid-template-columns:28px 56px 1fr;gap:10px;padding:9px 14px;border-top:1px solid var(--line);font-size:13.5px;align-items:baseline}
+.tst:first-child{border-top:0}
+.tst b{font-size:13px}
+.tst .muted{font-size:12.5px}
+.box p{margin:0;font-size:13.5px;color:var(--muted)}
+/* gantt extras */
+.g-row.g-group{height:24px;background:var(--soft)}
+.g-row.g-group .g-label{background:var(--soft);font-weight:700;font-size:11.5px;letter-spacing:.06em;color:var(--muted)}
+.g-bar.learn{background-image:repeating-linear-gradient(135deg,transparent 0 4px,color-mix(in srgb,var(--surface) 60%,transparent) 4px 8px)}
+.g-bar.buf{background:transparent;border:1.5px dashed var(--muted)}
+.g-test{position:absolute;top:9px;width:11px;height:11px;transform:rotate(45deg);background:var(--ink)}
+.g-tn{position:absolute;top:6px;font-size:11px;font-weight:700;color:var(--ink)}
+/* auth gate */
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+.gate{min-height:100vh;display:grid;place-items:center;padding:16px;background:var(--bg)}
+.gate-card{max-width:420px;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:28px 24px;display:grid;gap:14px}
+.gate-card h1{font-size:26px}
+.gate-card p{margin:0;font-size:14px;color:var(--muted)}
+.gate-card button,.seedbox button{justify-self:start;border:0;background:var(--accent);color:var(--surface);border-radius:4px;padding:8px 16px;font-weight:700}
+.gate-card button:disabled,.seedbox button:disabled{opacity:.6}
+.userbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:12.5px;color:var(--muted);margin-top:6px}
+.userbar button{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:2px 10px}
+.seedbox{display:grid;gap:10px;padding:16px;border:1px dashed var(--line);border-radius:6px;background:var(--surface)}
+.seedbox p{margin:0;font-size:14px}
+@media (max-width:720px){
+  .task{grid-template-columns:auto 1fr;grid-template-areas:"st main" ". meta"}
+  .task .st{grid-area:st} .task .t-main{grid-area:main}
+  .task .meta{grid-area:meta;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  form.add{grid-template-columns:1fr 1fr}
+  form.add input#nt{grid-column:1/-1}
+  .g-label{width:120px}
+  .lane{grid-template-columns:1fr;gap:6px}
+  .tst{grid-template-columns:24px 48px 1fr}
+}
+@media (min-width:721px){ .task .meta{display:contents} }
+@media (prefers-reduced-motion:reduce){ .bar i{transition:none} }
+</style>
+</style>
+</head>
+<body>
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="eyebrow">卒業制作 2026 後期 ・ 二人制作</div>
+    <h1>風神雷神 卒制ボード</h1>
+    <p id="gateMsg">読み込み中…</p>
+    <button id="loginBtn" type="button" hidden>Google でログイン</button>
+    <div id="denied" hidden style="display:grid;gap:10px">
+      <p>このアカウント（<b id="deniedEmail"></b>）には利用権限がありません。登録済みのアカウントでログインしてください。</p>
+      <button id="switchBtn" type="button">別のアカウントでログイン</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="app" hidden>
+<header>
+  <div class="title-row">
+    <div>
+      <div class="eyebrow">卒業制作 2026 後期 ・ 二人制作</div>
+      <h1>風神雷神 卒制ボード</h1>
+      <div class="userbar"><span id="userEmail"></span><button id="logoutBtn" type="button">ログアウト</button></div>
+    </div>
+    <div class="duo"><span class="dot" style="background:var(--maya)"></span>Maya <span class="dot" style="background:var(--md);margin-left:10px"></span>Marvelous Designer <span class="dot" style="background:var(--zb);margin-left:10px"></span>ZBrush <span class="dot" style="background:var(--out);margin-left:10px"></span>ChiTuBox <span class="dot" style="background:var(--unity);margin-left:10px"></span>Unity</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b class="mono" id="sDays">–</b><span>卒業制作展 2/2 まで（日）</span></div>
+    <div class="stat"><b class="mono" id="sFreeze">–</b><span>出力データ確定 12/18 まで（日）</span></div>
+    <div class="stat"><b class="mono" id="sClass">–</b><span>残りの授業日（木・金）</span></div>
+    <div class="stat"><b class="mono" id="sProg">–</b><span>タスク完了率</span><div class="bar"><i id="sBar"></i></div></div>
+  </div>
+  <div class="upcoming" id="upcoming"></div>
+</header>
+
+<section>
+  <div class="sec-head"><h2>制作フロー</h2><span class="muted" style="font-size:13px">◆ = ソフト間の受け渡しテスト</span></div>
+  <div class="flow">
+    <div class="lane"><div class="lane-h">共通<small>素体・リグ・アニメ</small></div><div class="steps">
+      <span class="step maya done">キャラデザ（服なし）</span><span class="arr">→</span>
+      <span class="step maya">素体モデル <em>途中</em></span><span class="arr">→</span>
+      <span class="step maya">リグ・素体ウェイト</span><span class="arr">→</span>
+      <span class="step maya">ポーズアニメ（11/13 確定）</span>
+    </div></div>
+    <div class="lane"><div class="lane-h">衣装<small>Marvelous Designer</small></div><div class="steps">
+      <span class="step">衣装デザイン <em>途中</em></span><span class="arr">→</span>
+      <span class="step md">MD 練習</span><span class="arr">→</span><span class="tp">◆①</span><span class="arr">→</span>
+      <span class="step md">アバター設定・T ポーズ衣装</span><span class="arr">→</span><span class="tp">◆②</span><span class="arr">→</span>
+      <span class="step md">アニメ読込・ポーズでシミュ</span><span class="arr">→</span>
+      <span class="step md">厚み付きで書き出し</span>
+    </div></div>
+    <div class="lane"><div class="lane-h">立体物<small>ZBrush → ChiTuBox</small></div><div class="steps">
+      <span class="step zb">ZBrush 練習</span><span class="arr">→</span><span class="tp">◆④</span><span class="arr">→</span>
+      <span class="step zb">ポーズ素体の造形</span><span class="arr">→</span>
+      <span class="step zb">衣装の作り込み・細部の補強</span><span class="arr">→</span>
+      <span class="step out">分割（先生と相談）</span><span class="arr">→</span><span class="tp">◆⑥</span><span class="arr">→</span>
+      <span class="step out">ChiTuBox で変換</span><span class="arr">→</span>
+      <span class="step out">出力</span><span class="arr">→</span>
+      <span class="step out">洗浄・硬化・表面処理</span>
+    </div></div>
+    <div class="lane"><div class="lane-h">VRM<small>Maya → Unity</small></div><div class="steps">
+      <span class="tp">◆③</span><span class="arr">素体で事前テスト →</span><span class="tp">◆⑤</span><span class="arr">→</span>
+      <span class="step maya">リトポ（素体・衣装・髪）</span><span class="arr">→</span>
+      <span class="step">UV 展開・テクスチャ</span><span class="arr">→</span>
+      <span class="step maya">ウェイト・揺れもの</span><span class="arr">→</span>
+      <span class="step maya">フェイシャル</span><span class="arr">→</span>
+      <span class="step unity">VRM 化</span><span class="arr">→</span>
+      <span class="step unity">プラグイン（表情・カメラ）＋配布アニメ</span><span class="arr">→</span>
+      <span class="step unity">モニター / 3D ディスプレイ</span>
+    </div></div>
+    <div class="lane"><div class="lane-h">プレゼン<small>卒展・企業向け</small></div><div class="steps">
+      <span class="step">制作記録（随時）</span><span class="arr">→</span>
+      <span class="step">資料（MD の活用）</span><span class="arr">→</span>
+      <span class="step">パネル・キャプション</span><span class="arr">→</span>
+      <span class="step">リハーサル</span>
+    </div></div>
+  </div>
+
+  <div class="eyebrow">経験と対策</div>
+  <div class="exp">
+    <div class="xp"><div class="xp-h">Marvelous Designer <span class="lv new">初めて</span></div><p>10/2〜10/23 を練習期間にし、10/23 に最初の受け渡しテスト。T ポーズ衣装の制作は 11/20 までと長めに取っています。</p></div>
+    <div class="xp"><div class="xp-h">ChiTuBox <span class="lv new">初めて</span></div><p>11 月中旬に先生の講習を受け、11/27 までにテスト出力。本出力の後に再出力用の予備を 1 週間置いています。</p></div>
+    <div class="xp"><div class="xp-h">ZBrush <span class="lv low">使用頻度が低い</span></div><p>10/30〜11/13 に練習期間。ポーズが決まった 11/13 から素体の造形を先に始め、作業期間を約 5 週間確保しています。</p></div>
+    <div class="xp"><div class="xp-h">Maya <span class="lv ok">経験あり</span></div><p>素体・リグ・アニメ・リトポ・ウェイト・フェイシャルを担当。リグは早めに入れて、ポーズアニメに余裕を持たせます。</p></div>
+    <div class="xp"><div class="xp-h">Unity・VRM <span class="lv ok">経験あり</span></div><p>11/13 に素体だけで事前テストし、配布アニメ・プラグイン・3D ディスプレイの相性を先に確認。完成目標 1/15 ＋予備 1 週間。</p></div>
+  </div>
+
+  <div class="eyebrow">受け渡しテスト（本番データでも書き出しのたびに同じ手順で確認）</div>
+  <div class="tests">
+    <div class="tst"><b>①</b><span class="mono">10/23</span><span>Maya → MD：素体をアバターとして読込 <span class="muted">単位・スケール・向き・ポリゴン数</span></span></div>
+    <div class="tst"><b>②</b><span class="mono">11/6</span><span>Maya → MD：テスト用アニメの読込 <span class="muted">FBX / Alembic、フレーム数</span></span></div>
+    <div class="tst"><b>③</b><span class="mono">11/13</span><span>Maya → Unity：素体だけで VRM 化 <span class="muted">プラグイン・配布アニメ・3D ディスプレイ表示</span></span></div>
+    <div class="tst"><b>④</b><span class="mono">11/19</span><span>MD → ZBrush：厚み付き書き出しと一体化 <span class="muted">縮尺後の肉厚・重なり</span></span></div>
+    <div class="tst"><b>⑤</b><span class="mono">11/20</span><span>MD → Maya：T ポーズ衣装をリトポ用に読込 <span class="muted">スケール・素体との位置</span></span></div>
+    <div class="tst"><b>⑥</b><span class="mono">11/27</span><span>ZBrush → ChiTuBox → テスト出力 <span class="muted">水密・肉厚・サポート</span></span></div>
+  </div>
+
+  <div class="box"><h4>デザインから気をつけたい点</h4><ul>
+    <li>ピンクの長いリボン状のパーツと大きな袖は MD で作ると自然に垂れますが、小さいフィギュアでは細く薄くなり折れやすいです。ZBrush で厚みと付け根を補強してください。角と耳の先も同様です。</li>
+    <li>同じパーツは VRM では揺れもの（SpringBone）が多くなり、配布アニメの腕の動きで体にめり込みやすいです。コライダーの設定と、1/15〜1/22 の予備期間で調整します。</li>
+    <li>衣装は未定なので、10/23 の確定までは MD の練習を兼ねて候補をいくつか試すと、デザインと技術確認を同時に進められます。</li>
+  </ul></div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>工程表</h2><span class="muted" style="font-size:13px">10/1 – 2/6 ・ バーの右に担当と期間</span></div>
+  <div class="gantt-scroll"><div class="gantt" id="gantt"></div></div>
+  <div class="legend">
+    <span><i style="background:var(--maya)"></i>Maya</span>
+    <span><i style="background:var(--md)"></i>Marvelous Designer</span>
+    <span><i style="background:var(--zb)"></i>ZBrush</span>
+    <span><i style="background:var(--out)"></i>ChiTuBox・出力</span>
+    <span><i style="background:var(--unity)"></i>Unity</span>
+    <span><i style="background:var(--gen)"></i>デザイン・テクスチャ・プレゼン</span>
+  </div>
+  <div class="legend">
+    <span><i style="background:var(--md);background-image:repeating-linear-gradient(135deg,transparent 0 3px,color-mix(in srgb,var(--surface) 60%,transparent) 3px 6px)"></i>練習・講習</span>
+    <span><i style="border:1.5px dashed var(--muted)"></i>予備期間</span>
+    <span><i style="background:var(--ink);width:8px;height:8px;transform:rotate(45deg)"></i>受け渡しテスト</span>
+    <span><b class="g-who pair">二人</b><b class="g-who">A</b><b class="g-who">B</b>担当</span>
+    <span><i style="background:var(--muted);width:5px"></i>木曜授業 <i style="background:var(--ink);width:5px;margin-left:6px"></i>金曜授業</span>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>授業日</h2><span class="muted mono" style="font-size:13px">28日 × 90分 × 6コマ ＝ 一人あたり 252 時間</span></div>
+  <div class="classes" id="classes"></div>
+  <details class="note"><summary>授業日の前提</summary>金曜 14 回は指定どおり。木曜は「金曜の前日」と仮定して並べています（10/8・12/10 は金曜が休みのため除外）。実際の木曜日程が違う場合は教えてください。12/19〜1/7 は授業がない期間として、学校のプリンタでの本出力と VRM のウェイト・フェイシャルに充てています。</details>
+</section>
+
+<section>
+  <div class="sec-head"><h2>やることリスト</h2>
+    <div class="members" id="members">
+      <span class="muted">担当名</span>
+      <label>A <input id="mA" maxlength="12" placeholder="メンバーA"></label>
+      <label>B <input id="mB" maxlength="12" placeholder="メンバーB"></label>
+    </div>
+  </div>
+  <div class="toolbar">
+    <div class="seg" role="group" aria-label="担当で絞り込み" id="fOwner">
+      <button data-v="all" aria-pressed="true">全員</button><button data-v="a" aria-pressed="false">A</button><button data-v="b" aria-pressed="false">B</button>
+    </div>
+    <label><input type="checkbox" id="fHide"> 完了を隠す</label>
+    <span class="notice" id="dbNote">読み込み中…</span>
+  </div>
+  <div class="seedbox" id="seedBox" hidden><p>まだタスクがありません。作成済みの計画（60 件）を読み込めます。</p><button id="seedBtn" type="button">初期タスクを読み込む</button></div>
+  <div id="tasks"></div>
+  <form class="add" id="addForm" autocomplete="off">
+    <input id="nt" placeholder="タスクを追加（例：袖の端を ZBrush で補強）" required maxlength="120">
+    <select id="np" aria-label="工程"></select>
+    <select id="no" aria-label="担当"><option value="both">両方</option><option value="a">A</option><option value="b">B</option></select>
+    <input id="nd" type="date" aria-label="期限" min="2026-09-01" max="2027-03-31">
+    <button type="submit">追加</button>
+  </form>
+</section>
+
+<section>
+  <div class="sec-head"><h2>制作物と決定事項</h2><span class="muted" style="font-size:13px">先生・二人で決めたこと</span></div>
+  <div class="eyebrow">制作物</div>
+  <div class="exhibit">
+    <div class="ex"><span class="k">制作物 1</span><h4>立体物</h4><p>小さめのフィギュア。塗装なし、小物なし。</p></div>
+    <div class="ex"><span class="k">制作物 2</span><h4>VRM</h4><p>配布アニメーションを使用。表情設定・カメラはプラグインで制作。</p></div>
+    <div class="ex"><span class="k">制作物 3</span><h4>プレゼン準備</h4><p>卒展での発表と、企業への MD 活用プレゼン。</p></div>
+  </div>
+  <div class="eyebrow">展示の構成</div>
+  <div class="exhibit">
+    <div class="ex"><span class="k">立体</span><h4>小さめのフィギュア</h4><p>学校のプリンタ（ChiTuBox）で出力。</p></div>
+    <div class="ex"><span class="k">モニター</span><h4>VRM モデルの映像</h4><p>Unity で動かした VRM を通常のモニターで見せる。</p></div>
+    <div class="ex"><span class="k">3D ディスプレイ</span><h4>見る人の視点で立体表示</h4><p>ソニーの視線追従型ディスプレイ（空間再現ディスプレイと思われる）。</p></div>
+  </div>
+  <div class="eyebrow">決定事項</div>
+  <div class="decisions">
+    <div class="dec"><span class="tag">キャラ</span><div><h4>オリジナルキャラクター（デザイン画あり）</h4><p>服なしのデザインは確定。衣装は未定で、10/23 の確定を目標にする。</p></div></div>
+    <div class="dec"><span class="tag">VRM</span><div><h4>VRM の制作は確定</h4><p>動きは配布アニメーション、表情設定とカメラはプラグインを使う。</p></div></div>
+    <div class="dec"><span class="tag">立体</span><div><h4>小さく、塗装なし、小物なし</h4><p>作り込みは ZBrush。分割はひとまず造形してから先生と相談する。</p></div></div>
+    <div class="dec"><span class="tag">出力</span><div><h4>学校のプリンタ（ChiTuBox）</h4><p>使い方は先生に教わる。冬休み中も使用できる。</p></div></div>
+    <div class="dec"><span class="tag">ポーズ</span><div><h4>大きなポーズは 11/13 に確定</h4><p>体・手足の向きはここで固定。指先・表情などは ZBrush で後から調整できる。</p></div></div>
+    <div class="dec"><span class="tag">展示機材</span><div><h4>モニター等の手配は不要</h4><p>3D ディスプレイの機種と対応する Unity バージョンだけ確認する。</p></div></div>
+    <div class="dec"><span class="tag">企業</span><div><h4>MD の会社とのやり取りは担当者と講師で実施済み</h4><p>こちらはプレゼンの中身の準備に集中する。</p></div></div>
+  </div>
+  <div class="box"><h4>プレゼンで話せる材料</h4><ul>
+    <li>なぜ MD を選んだか（手作業モデリングとの比較）</li>
+    <li>T ポーズ制作 → アニメ読込 → ポーズで再シミュのワークフロー</li>
+    <li>リボン状のパーツや大きな袖を MD で作った過程</li>
+    <li>一つの MD 衣装から、フィギュア用（ZBrush）と VRM 用（リトポ）の二つに展開した流れ</li>
+    <li>初めてのソフトを、受け渡しテストを挟みながら導入した進め方</li>
+  </ul></div>
+</section>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+import {
+  getFirestore, doc as fsDoc, getDoc as fsGetDoc, setDoc as fsSetDoc, collection as fsCollection,
+  addDoc as fsAddDoc, updateDoc as fsUpdateDoc, deleteDoc as fsDeleteDoc,
+  onSnapshot as fsOnSnapshot, writeBatch as fsWriteBatch
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+// 創作管理サイト（sousaku-labo）と同じ Firebase プロジェクトを使う
+const firebaseConfig = {
+  apiKey: "AIzaSyAkoqpr_NQWHLACbjDWscyz78edipjq9lU",
+  authDomain: "sousaku-labo.firebaseapp.com",
+  projectId: "sousaku-labo",
+  storageBucket: "sousaku-labo.firebasestorage.app",
+  messagingSenderId: "319541429312",
+  appId: "1:319541429312:web:461791e540a8b5c24d4ba5"
+};
+const fbApp = initializeApp(firebaseConfig);
+const fbAuth = getAuth(fbApp);
+const fbDb = getFirestore(fbApp);
+const googleProvider = new GoogleAuthProvider();
+let currentUser = null, allowed = false;
+
+/* ============================= AUTH GATE ============================= */
+const gateEl=document.getElementById('gate'), appEl=document.getElementById('app');
+const gateMsg=document.getElementById('gateMsg'), loginBtn=document.getElementById('loginBtn');
+const deniedBox=document.getElementById('denied'), deniedEmail=document.getElementById('deniedEmail');
+
+loginBtn.addEventListener('click', async ()=>{
+  loginBtn.disabled=true; gateMsg.textContent='ログイン中…';
+  try{ await signInWithPopup(fbAuth, googleProvider); }
+  catch(e){ console.error(e); gateMsg.textContent='ログインに失敗しました。もう一度お試しください。'; }
+  loginBtn.disabled=false;
+});
+document.getElementById('switchBtn').addEventListener('click', ()=> signOut(fbAuth));
+document.getElementById('logoutBtn').addEventListener('click', ()=> signOut(fbAuth));
+
+onAuthStateChanged(fbAuth, async (user)=>{
+  currentUser=user; allowed=false;
+  if(window.stopBoard) window.stopBoard();
+  appEl.hidden=true; gateEl.hidden=false; deniedBox.hidden=true; loginBtn.hidden=true;
+  if(!user){ gateMsg.textContent='このボードを使うには Google アカウントでログインしてください。'; loginBtn.hidden=false; return; }
+  gateMsg.textContent='確認中…';
+  try{ await fsGetDoc(fsDoc(fbDb, 'allowedEmails', user.email)); }
+  catch(err){ deniedEmail.textContent=user.email; deniedBox.hidden=false; gateMsg.textContent=''; return; }
+  allowed=true; gateEl.hidden=true; appEl.hidden=false;
+  document.getElementById('userEmail').textContent=user.email;
+  if(window.startBoard) window.startBoard();
+});
+
+const SEED={
+ k01:{ "due": "2026-10-02", "note": "", "order": 1, "owner": "both", "phase": "ph1", "status": "done", "title": "キャラデザイン（服なし）確定"},
+ k02:{ "due": "2026-10-23", "note": "MD の練習を兼ねて候補を試す", "order": 2, "owner": "both", "phase": "ph1", "status": "doing", "title": "衣装デザイン確定（三面図・素材感・色）"},
+ k03:{ "due": "2026-10-23", "note": "", "order": 3, "owner": "both", "phase": "ph1", "status": "todo", "title": "フィギュアのポーズ決定（ラフ）"},
+ k04:{ "due": "2026-10-09", "note": "", "order": 4, "owner": "both", "phase": "ph1", "status": "todo", "title": "役割分担を決める"},
+ k05:{ "due": "2026-10-09", "note": "", "order": 5, "owner": "both", "phase": "ph1", "status": "todo", "title": "ファイル命名・共有フォルダ・バックアップのルールを決める"},
+ k06:{ "due": "2026-10-09", "note": "", "order": 6, "owner": "both", "phase": "ph1", "status": "todo", "title": "ソフトのバージョンを揃える（Maya・MD・ZBrush・Unity・UniVRM）"},
+ k10:{ "due": "2026-10-23", "note": "単位・スケール・向き・ポリゴン数", "order": 10, "owner": "both", "phase": "ph8", "status": "todo", "title": "① Maya → MD：素体をアバターとして読込"},
+ k11:{ "due": "2026-11-06", "note": "FBX / Alembic、フレーム数", "order": 11, "owner": "both", "phase": "ph8", "status": "todo", "title": "② Maya → MD：テスト用アニメの読込"},
+ k12:{ "due": "2026-11-13", "note": "プラグイン・配布アニメ・3D ディスプレイ表示まで", "order": 12, "owner": "a", "phase": "ph8", "status": "todo", "title": "③ Maya → Unity：素体だけで VRM 化"},
+ k13:{ "due": "2026-11-19", "note": "縮尺後の肉厚・重なり", "order": 13, "owner": "b", "phase": "ph8", "status": "todo", "title": "④ MD → ZBrush：厚み付き書き出しと一体化"},
+ k14:{ "due": "2026-11-20", "note": "スケール・素体との位置", "order": 14, "owner": "a", "phase": "ph8", "status": "todo", "title": "⑤ MD → Maya：T ポーズ衣装をリトポ用に読込"},
+ k15:{ "due": "2026-11-27", "note": "水密・肉厚・サポート", "order": 15, "owner": "both", "phase": "ph8", "status": "todo", "title": "⑥ ZBrush → ChiTuBox → テスト出力"},
+ k16:{ "due": "2026-10-16", "note": "単位・スケール・向き・法線・ポリゴン数・ファイル名", "order": 9, "owner": "both", "phase": "ph8", "status": "todo", "title": "受け渡しのチェック項目を決める"},
+ k20:{ "due": "2026-10-23", "note": "", "order": 20, "owner": "a", "phase": "ph2", "status": "doing", "title": "素体モデルのディテール詰め（顔・手・体）"},
+ k21:{ "due": "2026-10-30", "note": "VRM にも流用できる", "order": 21, "owner": "a", "phase": "ph2", "status": "todo", "title": "リグ入れ（HumanIK 準拠のボーン名）"},
+ k22:{ "due": "2026-10-30", "note": "", "order": 22, "owner": "a", "phase": "ph2", "status": "todo", "title": "素体のウェイト（ポーズアニメ用）"},
+ k23:{ "due": "2026-11-06", "note": "MD シミュ用。急な動きを避ける", "order": 23, "owner": "a", "phase": "ph2", "status": "todo", "title": "T ポーズ → 最終ポーズの遷移アニメ（30〜60f）"},
+ k24:{ "due": "2026-11-13", "note": "大きなポーズはここで確定。細部は ZBrush で調整可", "order": 24, "owner": "a", "phase": "ph2", "status": "todo", "title": "最終ポーズ確定・書き出し"},
+ k30:{ "due": "2026-10-23", "note": "初めて使うので最初の 3 週間で", "order": 30, "owner": "both", "phase": "ph3", "status": "todo", "title": "MD の基本操作を練習（チュートリアル・簡単な服）"},
+ k31:{ "due": "2026-10-30", "note": "", "order": 31, "owner": "b", "phase": "ph3", "status": "todo", "title": "アバター設定（素体読込・配置ポイント）"},
+ k32:{ "due": "2026-11-20", "note": "", "order": 32, "owner": "b", "phase": "ph3", "status": "todo", "title": "衣装のパターン作成（T ポーズ）"},
+ k33:{ "due": "2026-11-20", "note": "", "order": 33, "owner": "b", "phase": "ph3", "status": "todo", "title": "リボン状のパーツ・大きな袖など布の部分"},
+ k34:{ "due": "2026-11-20", "note": "", "order": 34, "owner": "b", "phase": "ph3", "status": "todo", "title": "生地プロパティ（厚み・硬さ）の設定"},
+ k35:{ "due": "2026-11-20", "note": "", "order": 35, "owner": "b", "phase": "ph3", "status": "todo", "title": "T ポーズ衣装を書き出し（VRM リトポ用）"},
+ k36:{ "due": "2026-11-27", "note": "", "order": 36, "owner": "b", "phase": "ph3", "status": "todo", "title": "アニメ読込 → ポーズでシミュ・貫通修正"},
+ k37:{ "due": "2026-11-27", "note": "プレゼンでも見せやすい", "order": 37, "owner": "b", "phase": "ph3", "status": "todo", "title": "Wind で衣の翻りを演出"},
+ k38:{ "due": "2026-11-27", "note": "縮尺後に肉厚 1mm 以上", "order": 38, "owner": "b", "phase": "ph3", "status": "todo", "title": "厚み付きで書き出し（立体物用）"},
+ k40:{ "due": "2026-11-13", "note": "使用頻度が低いので事前に", "order": 40, "owner": "b", "phase": "ph4", "status": "todo", "title": "ZBrush の操作を練習（DynaMesh・ZRemesher・厚み付け）"},
+ k41:{ "due": "2026-12-04", "note": "11/13 のポーズ確定後すぐ始める", "order": 41, "owner": "b", "phase": "ph4", "status": "todo", "title": "ポーズ素体の造形（顔・手・髪）"},
+ k42:{ "due": "2026-12-16", "note": "", "order": 42, "owner": "b", "phase": "ph4", "status": "todo", "title": "衣装の作り込み（一体化・重なり修正・シワ）"},
+ k43:{ "due": "2026-12-16", "note": "小さいフィギュアなので折れやすい", "order": 43, "owner": "b", "phase": "ph4", "status": "todo", "title": "細いパーツの補強（リボン・袖の端・角・耳・指）"},
+ k44:{ "due": "2026-12-16", "note": "必要か先生と確認", "order": 44, "owner": "b", "phase": "ph4", "status": "todo", "title": "台座の造形"},
+ k50:{ "due": "2026-10-16", "note": "使用OK", "order": 50, "owner": "both", "phase": "ph5", "status": "done", "title": "冬休み中のプリンタ利用可否を先生に確認"},
+ k51:{ "due": "2026-11-13", "note": "小さいほど細いパーツの肉厚に注意", "order": 51, "owner": "both", "phase": "ph5", "status": "todo", "title": "フィギュアの出力サイズを先生と決める"},
+ k52:{ "due": "2026-11-20", "note": "サポート・中空化・洗浄と二次硬化まで", "order": 52, "owner": "both", "phase": "ph5", "status": "todo", "title": "ChiTuBox の使い方を先生に教わる"},
+ k53:{ "due": "2026-12-11", "note": "造形が固まってから", "order": 53, "owner": "both", "phase": "ph5", "status": "todo", "title": "分割方法を先生と相談"},
+ k54:{ "due": "2026-12-18", "note": "冬休み前の最後の授業で先生に確認", "order": 54, "owner": "both", "phase": "ph5", "status": "todo", "title": "分割・ChiTuBox で変換（サポート設定）"},
+ k55:{ "due": "2026-12-18", "note": "", "order": 55, "owner": "both", "phase": "ph5", "status": "todo", "title": "出力チェック（水密・肉厚・ポリゴン数）"},
+ k56:{ "due": "2027-01-08", "note": "", "order": 56, "owner": "b", "phase": "ph5", "status": "todo", "title": "本出力・サポート除去"},
+ k57:{ "due": "2027-01-15", "note": "初めての出力なので失敗を見込む", "order": 57, "owner": "b", "phase": "ph5", "status": "todo", "title": "再出力の予備期間"},
+ k58:{ "due": "2027-01-22", "note": "塗装なし", "order": 58, "owner": "b", "phase": "ph5", "status": "todo", "title": "洗浄・二次硬化・表面処理"},
+ k59:{ "due": "2027-01-29", "note": "", "order": 59, "owner": "both", "phase": "ph5", "status": "todo", "title": "組み立て・最終調整"},
+ k60:{ "due": "2026-10-02", "note": "", "order": 60, "owner": "both", "phase": "ph7", "status": "done", "title": "VRM 制作を決定"},
+ k61:{ "due": "2026-10-23", "note": "", "order": 61, "owner": "both", "phase": "ph7", "status": "todo", "title": "3D ディスプレイの機種と対応 Unity バージョンを先生に確認"},
+ k62:{ "due": "2026-11-06", "note": "展示・発表での使用可否、クレジット表記", "order": 62, "owner": "both", "phase": "ph7", "status": "todo", "title": "配布アニメの選定と利用規約の確認"},
+ k63:{ "due": "2026-11-06", "note": "3D ディスプレイの SDK と揃える", "order": 63, "owner": "a", "phase": "ph7", "status": "todo", "title": "プラグイン（表情・カメラ）の選定と対応バージョンの確認"},
+ k64:{ "due": "2026-12-11", "note": "", "order": 64, "owner": "a", "phase": "ph7", "status": "todo", "title": "リトポ（素体・衣装）"},
+ k65:{ "due": "2026-12-11", "note": "フィギュア用の髪とは別", "order": 65, "owner": "a", "phase": "ph7", "status": "todo", "title": "VRM 用の髪（メッシュ）"},
+ k66:{ "due": "2026-12-25", "note": "", "order": 66, "owner": "a", "phase": "ph7", "status": "todo", "title": "UV 展開・テクスチャ作成"},
+ k67:{ "due": "2027-01-08", "note": "リボン・袖はコライダーも設定", "order": 67, "owner": "a", "phase": "ph7", "status": "todo", "title": "ウェイト（衣装込みの全身）・揺れもの（SpringBone）"},
+ k68:{ "due": "2027-01-08", "note": "", "order": 68, "owner": "a", "phase": "ph7", "status": "todo", "title": "フェイシャル（ブレンドシェイプ）"},
+ k69:{ "due": "2027-01-15", "note": "", "order": 69, "owner": "a", "phase": "ph7", "status": "todo", "title": "Unity で VRM 化（Humanoid・メタ情報）"},
+ k70:{ "due": "2027-01-15", "note": "", "order": 70, "owner": "a", "phase": "ph7", "status": "todo", "title": "プラグインで表情・カメラを設定"},
+ k71:{ "due": "2027-01-22", "note": "予備期間を兼ねる", "order": 71, "owner": "a", "phase": "ph7", "status": "todo", "title": "配布アニメを当てて破綻・貫通を確認・修正"},
+ k72:{ "due": "2027-01-29", "note": "", "order": 72, "owner": "both", "phase": "ph7", "status": "todo", "title": "モニター用のシーン・映像"},
+ k73:{ "due": "2027-01-29", "note": "", "order": 73, "owner": "both", "phase": "ph7", "status": "todo", "title": "3D ディスプレイ用のシーン"},
+ k80:{ "due": "2027-01-29", "note": "特に MD の作業画面。後から再現しにくい", "order": 80, "owner": "both", "phase": "ph6", "status": "doing", "title": "制作過程のスクショ・画面録画（各工程）"},
+ k81:{ "due": "2027-01-22", "note": "", "order": 81, "owner": "both", "phase": "ph6", "status": "todo", "title": "プレゼン資料（MD 採用理由・ワークフロー・Before/After）"},
+ k82:{ "due": "2027-01-29", "note": "", "order": 82, "owner": "both", "phase": "ph6", "status": "todo", "title": "展示パネル・キャプション"},
+ k83:{ "due": "2027-01-29", "note": "", "order": 83, "owner": "both", "phase": "ph6", "status": "todo", "title": "リハーサル"},
+};
+(function(){
+const DAY=86400000;
+const D=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const fmt=d=>(d.getMonth()+1)+'/'+d.getDate();
+const today=(()=>{const n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate())})();
+const diff=(a,b)=>Math.round((a-b)/DAY);
+
+const FRI=['2026-10-02','2026-10-16','2026-10-23','2026-10-30','2026-11-06','2026-11-13','2026-11-20','2026-11-27','2026-12-04','2026-12-18','2027-01-08','2027-01-15','2027-01-22','2027-01-29'];
+const THU=FRI.map(s=>{const d=D(s);d.setDate(d.getDate()-1);return d});
+const CLASSES=[...FRI.map(s=>({d:D(s),w:'金'})),...THU.map(d=>({d,w:'木'}))].sort((a,b)=>a.d-b.d);
+
+const PHASES=[
+ {id:'ph1',name:'準備・デザイン',span:'〜10/23',c:'gen'},
+ {id:'ph8',name:'受け渡しテスト',span:'10/23〜11/27',c:'ink'},
+ {id:'ph2',name:'素体・リグ・アニメ（Maya）',span:'〜11/13',c:'maya'},
+ {id:'ph3',name:'衣装（Marvelous Designer）',span:'10/2〜11/27',c:'md'},
+ {id:'ph4',name:'立体物：作り込み（ZBrush）',span:'10/30〜12/16',c:'zb'},
+ {id:'ph5',name:'立体物：分割・ChiTuBox・出力',span:'11/12〜1/29',c:'out'},
+ {id:'ph7',name:'VRM（Maya → Unity）',span:'11/6〜1/29',c:'unity'},
+ {id:'ph6',name:'プレゼン準備',span:'随時〜2/1',c:'gen'}
+];
+
+// [ラベル, 開始, 終了, 色(ソフト) と種類(learn=練習 / buf=予備), 担当(pair=二人 / a / b)]。'#' で始まる行は見出し
+const ROWS=[
+ ['#共通・衣装'],
+ ['衣装デザイン確定','2026-10-01','2026-10-23','gen','pair'],
+ ['素体モデル仕上げ','2026-10-01','2026-10-23','maya','a'],
+ ['MD 練習','2026-10-02','2026-10-23','md learn','pair'],
+ ['リグ・素体ウェイト','2026-10-16','2026-10-30','maya','a'],
+ ['ポーズアニメ','2026-10-30','2026-11-13','maya','a'],
+ ['MD アバター・T ポーズ衣装','2026-10-23','2026-11-20','md','b'],
+ ['MD ポーズシミュ・書き出し','2026-11-13','2026-11-27','md','b'],
+ ['#立体物'],
+ ['ZBrush 練習','2026-10-30','2026-11-13','zb learn','b'],
+ ['ポーズ素体の造形','2026-11-13','2026-12-04','zb','b'],
+ ['衣装の作り込み・補強','2026-11-27','2026-12-16','zb','b'],
+ ['ChiTuBox 講習・テスト出力','2026-11-12','2026-11-27','out learn','pair'],
+ ['分割・ChiTuBox 変換','2026-12-10','2026-12-18','out','pair'],
+ ['本出力','2026-12-19','2027-01-08','out','b'],
+ ['再出力の予備','2027-01-08','2027-01-15','buf','b'],
+ ['洗浄・硬化・表面処理','2027-01-08','2027-01-22','out','b'],
+ ['#VRM'],
+ ['事前テスト（素体のみ）','2026-11-06','2026-11-13','unity','a'],
+ ['リトポ（素体・衣装・髪）','2026-11-20','2026-12-11','maya','a'],
+ ['UV 展開・テクスチャ','2026-12-04','2026-12-25','gen','a'],
+ ['ウェイト・揺れもの','2026-12-18','2027-01-08','maya','a'],
+ ['フェイシャル','2026-12-25','2027-01-08','maya','a'],
+ ['VRM 化・プラグイン・配布アニメ','2027-01-08','2027-01-15','unity','a'],
+ ['VRM の予備（エラー対応）','2027-01-15','2027-01-22','buf','a'],
+ ['モニター・3D 表示シーン','2027-01-15','2027-01-29','unity','pair'],
+ ['#プレゼン'],
+ ['制作記録（随時）','2026-10-01','2027-01-29','light','pair'],
+ ['プレゼン資料・パネル','2027-01-08','2027-01-29','gen','pair'],
+ ['リハーサル','2027-01-26','2027-02-01','gen','pair'],
+ ['卒業制作展','2027-02-02','2027-02-06','event','']
+];
+const TESTS=[['2026-10-23','①'],['2026-11-06','②'],['2026-11-13','③'],['2026-11-19','④'],['2026-11-20','⑤'],['2026-11-27','⑥']];
+const MS=[['2026-10-23','デザイン確定'],['2026-11-13','ポーズ確定'],['2026-11-20','T衣装確定'],['2026-12-18','出力データ確定'],['2027-01-15','VRM完成'],['2027-02-02','卒展']];
+
+// stats
+document.getElementById('sDays').textContent=Math.max(0,diff(D('2027-02-02'),today));
+document.getElementById('sFreeze').textContent=Math.max(0,diff(D('2026-12-18'),today));
+const remaining=CLASSES.filter(c=>c.d>=today);
+document.getElementById('sClass').textContent=remaining.length+' / '+CLASSES.length;
+
+// gantt（担当名が変わったら描き直す）
+function drawGantt(){
+  const start=D('2026-09-28'), end=D('2027-02-08');
+  const px=7, days=diff(end,start), W=days*px;
+  const x=d=>diff(d,start)*px;
+  const g=document.getElementById('gantt');
+  const who=k=>k==='pair'?'二人':k?name(k):'';
+  let h='<div class="g-row g-months"><div class="g-label muted">月</div><div class="g-track" style="width:'+W+'px">';
+  for(let m=new Date(2026,9,1);m<end;m=new Date(m.getFullYear(),m.getMonth()+1,1)) h+='<span style="left:'+x(m)+'px">'+(m.getMonth()+1)+'月</span>';
+  h+='</div></div><div class="g-row g-class"><div class="g-label muted">授業日</div><div class="g-track" style="width:'+W+'px">';
+  CLASSES.forEach(c=>{h+='<i class="'+(c.w==='金'?'fri':'thu')+'" style="left:'+(x(c.d)+1)+'px" title="'+fmt(c.d)+'（'+c.w+'）"></i>'});
+  h+='</div></div><div class="g-row"><div class="g-label">受け渡しテスト</div><div class="g-track" style="width:'+W+'px">';
+  TESTS.forEach((t,i)=>{const p=x(D(t[0]));h+='<i class="g-test" style="left:'+(p+1)+'px" title="'+fmt(D(t[0]))+' テスト'+t[1]+'"></i><span class="g-tn" style="left:'+(p+(i===3?-14:15))+'px">'+t[1]+'</span>'});
+  h+='</div></div>';
+  ROWS.forEach(r=>{
+    if(r[0][0]==='#'){h+='<div class="g-row g-group"><div class="g-label">'+r[0].slice(1)+'</div><div class="g-track" style="width:'+(W+150)+'px"></div></div>';return}
+    const s=D(r[1]),e=D(r[2]);const w=Math.max(px,(diff(e,s)+1)*px);
+    const span=fmt(s)+'–'+fmt(e);
+    const tag='<span class="g-after" style="left:'+(x(s)+w+6)+'px">'+(r[4]?'<b class="g-who'+(r[4]==='pair'?' pair':'')+'">'+esc(who(r[4]))+'</b>':'')+'<span class="g-date">'+span+'</span></span>';
+    h+='<div class="g-row"><div class="g-label" title="'+r[0]+'">'+r[0]+'</div><div class="g-track" style="width:'+(W+150)+'px"><div class="g-bar '+r[3]+'" style="left:'+x(s)+'px;width:'+w+'px" title="'+r[0]+' '+span+'"></div>'+tag+'</div></div>';
+  });
+  const off=window.matchMedia('(max-width:720px)').matches?120:168;
+  MS.forEach((m,i)=>{h+='<div class="g-ms" style="left:'+(off+x(D(m[0])))+'px"><em style="bottom:'+(i%2?18:2)+'px">'+fmt(D(m[0]))+' '+m[1]+'</em></div>'});
+  if(today>=start&&today<=end) h+='<div class="g-ms today" style="left:'+(off+x(today)+3)+'px"><em>今日</em></div>';
+  g.innerHTML=h;
+}
+
+// class days
+(function(){
+  const nextIdx=CLASSES.findIndex(c=>c.d>=today);
+  const phaseAt=d=>{const t=d.getTime();
+    if(t<=D('2026-10-23'))return '素体・衣装デザイン・MD練習';
+    if(t<=D('2026-11-13'))return 'リグ・アニメ／MD衣装／ZBrush練習';
+    if(t<=D('2026-11-27'))return 'MDシミュ／ZBrush造形／リトポ';
+    if(t<=D('2026-12-18'))return 'ZBrush作り込み・変換／UV';
+    if(t<=D('2027-01-15'))return '表面処理／VRM実装';
+    return '展示シーン・プレゼン準備'};
+  document.getElementById('classes').innerHTML=CLASSES.map((c,i)=>'<div class="cd'+(c.d<today?' past':'')+(i===nextIdx?' next':'')+'"><span class="mono">'+fmt(c.d)+' （'+c.w+'）</span><span class="muted">'+phaseAt(c.d)+'</span></div>').join('');
+})();
+
+// tasks
+const np=document.getElementById('np');
+np.innerHTML=PHASES.map(p=>'<option value="'+p.id+'">'+p.name+'</option>').join('');
+let tasks=[],loaded=false,members={a:'',b:''},unsubTasks=null,unsubBoard=null;
+const st={owner:'all',hide:false};
+const LABEL={todo:'未着手',doing:'作業中',done:'完了'};
+const NEXT={todo:'doing',doing:'done',done:'todo'};
+const name=k=>k==='a'?(members.a||'A'):k==='b'?(members.b||'B'):'両方';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let armed=null;
+
+// Firestore の保存場所：sotsusei/board（担当名）と sotsusei/board/tasks/{id}（タスク）
+const boardRef=fsDoc(fbDb,'sotsusei','board');
+const tasksCol=fsCollection(fbDb,'sotsusei','board','tasks');
+const taskRef=id=>fsDoc(fbDb,'sotsusei','board','tasks',id);
+const who=()=>currentUser?(currentUser.displayName||currentUser.email):'';
+
+function render(){
+  const root=document.getElementById('tasks');
+  const done=tasks.filter(t=>t.status==='done').length;
+  const pct=tasks.length?Math.round(done/tasks.length*100):0;
+  document.getElementById('sProg').textContent=tasks.length?pct+'%':'–';
+  document.getElementById('sBar').style.width=pct+'%';
+  const lim=new Date(today.getTime()+14*DAY);
+  const up=tasks.filter(t=>t.status!=='done'&&t.due&&D(t.due)<=lim).sort((a,b)=>a.due<b.due?-1:1).slice(0,6);
+  document.getElementById('upcoming').innerHTML=!loaded?'':up.length?'<div class="eyebrow">2 週間以内の締切</div>'+up.map(t=>'<div class="up-item'+(D(t.due)<today?' late':'')+'"><span class="mono">'+fmt(D(t.due))+'</span><span>'+esc(t.title)+'</span><span class="muted" style="font-size:12.5px">'+esc(name(t.owner))+'</span></div>').join(''):'<div class="eyebrow">2 週間以内の締切はありません</div>';
+  document.getElementById('seedBox').hidden=!(loaded&&tasks.length===0);
+  if(!loaded){root.innerHTML='<div class="empty">タスクを読み込んでいます…</div>';return}
+  const vis=tasks.filter(t=>(st.owner==='all'||t.owner===st.owner||t.owner==='both')&&(!st.hide||t.status!=='done'));
+  let h='';
+  PHASES.forEach(p=>{
+    const list=vis.filter(t=>t.phase===p.id).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:(a.due||'9')>(b.due||'9')?1:(a.order||0)-(b.order||0));
+    const all=tasks.filter(t=>t.phase===p.id);const dn=all.filter(t=>t.status==='done').length;
+    h+='<div class="phase"><h3><span class="ph-mark" style="background:var(--'+p.c+')"></span>'+p.name+' <small>'+p.span+' ・ '+dn+'/'+all.length+'</small></h3>';
+    if(!list.length)h+='<div class="empty">'+(all.length?'絞り込み条件に合うタスクはありません。':'まだタスクがありません。下のフォームから追加できます。')+'</div>';
+    list.forEach(t=>{
+      const late=t.status!=='done'&&t.due&&D(t.due)<today;
+      h+='<div class="task '+t.status+'" data-id="'+esc(t.id)+'"><button class="st '+t.status+'" data-act="st" title="クリックで状態を切り替え">'+LABEL[t.status]+'</button>'+
+        '<div class="t-main"><div class="t-title">'+esc(t.title)+'</div>'+(t.note?'<div class="t-note">'+esc(t.note)+'</div>':'')+'</div>'+
+        '<div class="meta"><span class="due mono'+(late?' late':'')+'">'+(t.due?fmt(D(t.due)):'—')+'</span>'+
+        '<select data-act="own" aria-label="担当">'+['both','a','b'].map(k=>'<option value="'+k+'"'+(t.owner===k?' selected':'')+'>'+esc(name(k))+'</option>').join('')+'</select>'+
+        '<button class="del'+(armed===t.id?' arm':'')+'" data-act="del">'+(armed===t.id?'本当に削除':'削除')+'</button></div></div>';
+    });
+    h+='</div>';
+  });
+  root.innerHTML=h;
+}
+
+document.getElementById('tasks').addEventListener('click',async e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const id=b.closest('.task').dataset.id;const t=tasks.find(x=>x.id===id);if(!t)return;
+  try{
+    if(b.dataset.act==='st'){await fsUpdateDoc(taskRef(id),{status:NEXT[t.status]||'todo',updatedBy:who(),updatedAt:Date.now()})}
+    else if(b.dataset.act==='del'){
+      if(armed!==id){armed=id;render();setTimeout(()=>{if(armed===id){armed=null;render()}},4000);return}
+      armed=null;await fsDeleteDoc(taskRef(id));
+    }
+  }catch(err){console.error(err);note('保存できませんでした。ログインしているアカウントに編集権限があるか確認してください。')}
+});
+document.getElementById('tasks').addEventListener('change',async e=>{
+  const s=e.target.closest('select[data-act="own"]');if(!s)return;
+  const id=s.closest('.task').dataset.id;
+  try{await fsUpdateDoc(taskRef(id),{owner:s.value,updatedBy:who(),updatedAt:Date.now()})}catch(err){console.error(err);note('保存できませんでした。')}
+});
+document.getElementById('fOwner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st.owner=b.dataset.v;document.querySelectorAll('#fOwner button').forEach(x=>x.setAttribute('aria-pressed',x===b));render()});
+document.getElementById('fHide').addEventListener('change',e=>{st.hide=e.target.checked;try{localStorage.setItem('hideDone',st.hide?'1':'')}catch(_){};render()});
+try{if(localStorage.getItem('hideDone')){st.hide=true;document.getElementById('fHide').checked=true}}catch(_){}
+
+document.getElementById('addForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const title=document.getElementById('nt').value.trim();if(!title)return;
+  const data={title,phase:np.value,owner:document.getElementById('no').value,due:document.getElementById('nd').value||'',status:'todo',note:'',order:Date.now(),updatedBy:who(),updatedAt:Date.now()};
+  try{await fsAddDoc(tasksCol,data);document.getElementById('nt').value='';document.getElementById('nd').value=''}
+  catch(err){console.error(err);note('追加できませんでした。ログインしているアカウントに編集権限があるか確認してください。')}
+});
+
+document.getElementById('seedBtn').addEventListener('click',async e=>{
+  const btn=e.currentTarget;if(tasks.length)return;
+  btn.disabled=true;btn.textContent='読み込み中…';
+  try{
+    const batch=fsWriteBatch(fbDb);
+    Object.entries(SEED).forEach(([id,t])=>batch.set(taskRef(id),Object.assign({},t,{updatedBy:who(),updatedAt:Date.now()})));
+    await batch.commit();
+  }catch(err){console.error(err);note('初期タスクを読み込めませんでした。Firestore のルールを確認してください。');btn.disabled=false;btn.textContent='初期タスクを読み込む'}
+});
+
+let mTimer=null;
+['mA','mB'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{
+  clearTimeout(mTimer);mTimer=setTimeout(async()=>{
+    const v={a:document.getElementById('mA').value.trim(),b:document.getElementById('mB').value.trim()};
+    try{await fsSetDoc(boardRef,{members:v},{merge:true})}catch(err){console.error(err);note('担当名を保存できませんでした。')}
+  },700)}));
+
+function note(t){document.getElementById('dbNote').textContent=t}
+drawGantt();render();
+
+// ログインが確認できたら購読を始める
+window.startBoard=function(){
+  if(unsubTasks)return;
+  note('変更は二人の画面に自動で反映されます。');
+  unsubTasks=fsOnSnapshot(tasksCol,s=>{tasks=s.docs.map(d=>Object.assign({id:d.id},d.data()));loaded=true;render()},
+    err=>{console.error(err);loaded=true;note('タスクを読み込めませんでした。ページを再読み込みしてください。');render()});
+  unsubBoard=fsOnSnapshot(boardRef,s=>{const d=(s.exists()&&s.data().members)||{};members={a:d.a||'',b:d.b||''};drawGantt();
+    ['mA','mB'].forEach((id,i)=>{const el=document.getElementById(id);if(document.activeElement!==el)el.value=members[i?'b':'a']});render()},err=>console.error(err));
+};
+window.stopBoard=function(){
+  if(unsubTasks){unsubTasks();unsubTasks=null}
+  if(unsubBoard){unsubBoard();unsubBoard=null}
+  tasks=[];loaded=false;render();
+};
+if(currentUser&&allowed)window.startBoard();
+})();
+</script>
+</body>
+</html>
