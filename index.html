@@ -424,7 +424,7 @@ img{max-width:100%}
       <span class="step maya">ポーズアニメ（11/13 確定）</span>
     </div></div>
     <div class="lane"><div class="lane-h">衣装<small>Marvelous Designer</small></div><div class="steps">
-      <span class="step">衣装デザイン <em>途中</em></span><span class="arr">→</span>
+      <span class="step">各自の衣装案（10/16 共有） <em>途中</em></span><span class="arr">→</span><span class="step">すり合わせ・確定（10/23）</span><span class="arr">→</span>
       <span class="step md">MD 練習</span><span class="arr">→</span><span class="tp">◆①</span><span class="arr">→</span>
       <span class="step md">アバター設定・T ポーズ衣装</span><span class="arr">→</span><span class="tp">◆②</span><span class="arr">→</span>
       <span class="step md">アニメ読込・ポーズでシミュ</span><span class="arr">→</span>
@@ -531,7 +531,8 @@ img{max-width:100%}
   </div>
   <div class="eyebrow">決定事項</div>
   <div class="decisions">
-    <div class="dec"><span class="tag">キャラ</span><div><h4>オリジナルキャラクター（デザイン画あり）</h4><p>服なしのデザインは確定。衣装は未定で、10/23 の確定を目標にする。</p></div></div>
+    <div class="dec"><span class="tag">キャラ</span><div><h4>オリジナルキャラクター（デザイン画あり）</h4><p>服なしのデザインは確定。衣装は各自で案を考えて 10/16 に共有し、10/23 にすり合わせて確定する。</p></div></div>
+    <div class="dec"><span class="tag">進め方</span><div><h4>途中経過はチャット（LINE 含む）で随時共有</h4><p>案は適宜更新して連絡し合う。早く決まれば 10/23 を待たずに前倒しで次の工程へ進む。</p></div></div>
     <div class="dec"><span class="tag">VRM</span><div><h4>VRM の制作は確定</h4><p>動きは配布アニメーション、表情設定とカメラはプラグインを使う。</p></div></div>
     <div class="dec"><span class="tag">立体</span><div><h4>小さく、塗装なし、小物なし</h4><p>作り込みは ZBrush。分割はひとまず造形してから先生と相談する。</p></div></div>
     <div class="dec"><span class="tag">出力</span><div><h4>学校のプリンタ（ChiTuBox）</h4><p>使い方は先生に教わる。冬休み中も使用できる。</p></div></div>
@@ -688,7 +689,8 @@ const PHASES=[
 // [ラベル, 開始, 終了, 色(ソフト) と種類(learn=練習 / buf=予備), 担当(pair=二人 / a / b)]。'#' で始まる行は見出し
 const ROWS=[
  ['#共通・衣装'],
- ['衣装デザイン確定','2026-10-01','2026-10-23','gen','pair'],
+ ['各自の衣装案','2026-10-01','2026-10-16','gen','each'],
+ ['衣装案すり合わせ・確定','2026-10-16','2026-10-23','gen','pair'],
  ['素体モデル仕上げ','2026-10-01','2026-10-23','maya','a'],
  ['MD 練習','2026-10-02','2026-10-23','md learn','pair'],
  ['リグ・素体ウェイト','2026-10-16','2026-10-30','maya','a'],
@@ -720,7 +722,7 @@ const ROWS=[
  ['卒業制作展','2027-02-02','2027-02-06','event','']
 ];
 const TESTS=[['2026-10-23','①'],['2026-11-06','②'],['2026-11-13','③'],['2026-11-19','④'],['2026-11-20','⑤'],['2026-11-27','⑥']];
-const MS=[['2026-10-23','デザイン確定'],['2026-11-13','ポーズ確定'],['2026-11-20','T衣装確定'],['2026-12-18','出力データ確定'],['2027-01-15','VRM完成'],['2027-02-02','卒展']];
+const MS=[['2026-10-16','衣装案共有'],['2026-10-23','衣装デザイン確定'],['2026-11-13','ポーズ確定'],['2026-11-20','T衣装確定'],['2026-12-18','出力データ確定'],['2027-01-15','VRM完成'],['2027-02-02','卒展']];
 
 // stats
 document.getElementById('sDays').textContent=Math.max(0,diff(D('2027-02-02'),today));
@@ -733,7 +735,7 @@ function drawGantt(){
   const px=7, days=diff(end,start), W=days*px;
   const x=d=>diff(d,start)*px;
   const g=document.getElementById('gantt');
-  const who=k=>k==='pair'?'二人':k?name(k):'';
+  const who=k=>k==='pair'?'二人':k==='each'?'各自':k?name(k):'';
   let h='<div class="g-row g-months"><div class="g-label muted">月</div><div class="g-track" style="width:'+W+'px">';
   for(let m=new Date(2026,9,1);m<end;m=new Date(m.getFullYear(),m.getMonth()+1,1)) h+='<span style="left:'+x(m)+'px">'+(m.getMonth()+1)+'月</span>';
   h+='</div></div><div class="g-row g-class"><div class="g-label muted">授業日</div><div class="g-track" style="width:'+W+'px">';
