@@ -201,6 +201,8 @@ img{max-width:100%}
 @media (prefers-reduced-motion:reduce){ .bar i{transition:none} }
 /* tabs */
 .tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);padding-block:8px;margin-top:-16px}
+.tabs{scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
 .tabs button{border:0;background:transparent;padding:6px 12px;border-radius:4px;font-size:13.5px;white-space:nowrap;color:var(--muted);font-weight:500}
 .tabs button:hover{color:var(--ink)}
 .tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
@@ -219,21 +221,41 @@ img{max-width:100%}
 .cal-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .cal-head b{font-size:18px;min-width:7em}
 .cal-head button,.btn2{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:4px 12px;font-size:13px}
-.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
-.cal .wd{background:var(--soft);font-size:11.5px;font-weight:700;text-align:center;padding:4px 0;color:var(--muted)}
-.cday{background:var(--surface);min-height:104px;padding:4px 5px;display:flex;flex-direction:column;gap:2px;font-size:11.5px;border:0;text-align:left;min-width:0;cursor:pointer;color:var(--ink)}
+.cal{border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+.cal-wd{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:var(--soft);font-size:11.5px;font-weight:700;text-align:center;color:var(--muted)}
+.cal-wd span{padding:4px 0}
+.wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line);min-height:112px}
+.cday{grid-row:1/-1;background:transparent;border:0;border-left:1px solid var(--line);padding:3px 4px;text-align:left;cursor:pointer;color:var(--ink);min-width:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start}
+.cday:first-child{border-left:0}
 .cday.out{background:var(--soft);color:var(--muted)}
 .cday.sel{box-shadow:inset 0 0 0 2px var(--accent)}
 .cday .dn{font-size:12px;font-weight:700;width:22px;height:22px;display:grid;place-items:center;border-radius:50%;font-variant-numeric:tabular-nums}
 .cday.today .dn{background:var(--ink);color:var(--bg)}
-.ev{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid var(--gen);padding-left:4px;line-height:1.5;max-width:100%}
-.ev.ms{color:var(--high);font-weight:700;border-left-color:var(--high)}
-.ev.cls{color:var(--muted);border-left-color:transparent;padding-left:0;font-size:10.5px}
-.ev.tst{border-left-color:var(--ink);font-weight:700}
+.band{position:relative;z-index:1;margin:1px 3px;height:19px;border:0;border-radius:3px;font-size:11px;line-height:19px;padding:0 5px;text-align:left;cursor:pointer;display:flex;gap:4px;align-items:center;min-width:0;color:var(--ink);background:color-mix(in srgb,var(--c) 20%,var(--surface));box-shadow:inset 3px 0 0 var(--c)}
+.band span.t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.band.cl{border-top-left-radius:0;border-bottom-left-radius:0;box-shadow:none;margin-left:0}
+.band.cr{border-top-right-radius:0;border-bottom-right-radius:0;margin-right:0}
+.band.holiday{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--muted) 18%,var(--surface)) 0 4px,var(--surface) 4px 8px);box-shadow:inset 3px 0 0 var(--muted);color:var(--muted)}
+.ic{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;font-size:9.5px;font-weight:700;line-height:1;color:var(--surface);background:var(--c);flex:none}
+.dits{position:relative;z-index:1;pointer-events:none;padding:1px 4px 4px;display:flex;flex-direction:column;gap:1px;min-width:0;align-self:start}
+.ev{display:flex;gap:3px;align-items:center;white-space:nowrap;overflow:hidden;font-size:11px;line-height:1.5;min-width:0}
+.ev .t{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ev .dot{width:6px;height:6px;border-radius:50%;background:var(--c);flex:none}
+.ev.ms{color:var(--high);font-weight:700}
+.ev.cls{color:var(--muted);font-size:10px}
+.ev.tst{font-weight:700}
 .ev.done{color:var(--muted);text-decoration:line-through}
-.ev.more{border-left-color:transparent;color:var(--muted)}
+.ev.more{color:var(--muted)}
 .cal-day{display:grid;gap:6px}
 .cal-day h3{margin:0;font-size:15px}
+.cal-day .up-item{grid-template-columns:64px 1fr auto}
+.cal-day .acts{display:flex;gap:4px}
+.cal-day .acts button{border:0;background:none;color:var(--muted);font-size:12px;padding:2px 4px}
+.cal-day .acts button.arm{color:var(--high);font-weight:700}
+.ev-types{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.ev-types span{display:inline-flex;gap:5px;align-items:center}
+.form-row3{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+.form-row3 label,.form-row label{display:grid;gap:3px;font-size:12px;color:var(--muted)}
 /* task detail */
 .t-toggle{border:0;background:none;color:var(--accent);font-size:12.5px;padding:2px 4px;white-space:nowrap}
 .t-detail{grid-column:1/-1;display:grid;gap:10px;padding:10px 4px 4px;border-top:1px dashed var(--line);margin-top:4px}
@@ -272,9 +294,11 @@ img{max-width:100%}
 .post-h .acts button.arm{color:var(--high);font-weight:700}
 .post-body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;margin:0}
 @media (max-width:720px){
-  .cday{min-height:64px;padding:3px}
-  .ev{font-size:10px;border-left-width:2px;padding-left:2px}
-  .ev.cls{display:none}
+  .wk{min-height:84px}
+  .band{font-size:10px;padding:0 3px;margin:1px 1px}
+  .band .ic{width:12px;height:12px;font-size:8px}
+  .ev{font-size:10px}
+  .form-row3{grid-template-columns:1fr 1fr}
   .t-row,.form-row{grid-template-columns:1fr}
   .dl-row{grid-template-columns:52px 1fr auto}
 }
@@ -333,6 +357,10 @@ img{max-width:100%}
       <div class="sec-head"><h2>2 週間以内のタスク</h2><button class="btn2" type="button" data-goto="tasks">やることリストへ</button></div>
       <div class="upcoming" id="upcoming"></div>
     </div>
+    <div>
+      <div class="sec-head"><h2>今後の予定</h2><button class="btn2" type="button" data-goto="calendar">カレンダーへ</button></div>
+      <div class="upcoming" id="homeEvents"></div>
+    </div>
   </div>
   <div style="display:grid;gap:8px">
     <div class="sec-head"><h2>掲示板</h2><button class="btn2" type="button" data-goto="board">すべて見る・投稿する</button></div>
@@ -346,13 +374,22 @@ img{max-width:100%}
       <div class="cal-head"><button type="button" id="calPrev" aria-label="前の月">‹</button><b id="calTitle"></b><button type="button" id="calNext" aria-label="次の月">›</button><button type="button" id="calToday">今月</button></div>
     </div>
     <div class="cal" id="cal"></div>
-    <div class="legend">
-      <span><i style="background:var(--high)"></i>締切・節目</span>
-      <span><i style="background:var(--ink)"></i>受け渡しテスト</span>
-      <span><i style="background:var(--maya)"></i>タスクの期限（工程の色）</span>
-      <span>木・金：授業日</span>
-    </div>
+    <div class="ev-types" id="evTypes"></div>
     <div class="cal-day" id="calDay"></div>
+    <form class="form" id="evForm" autocomplete="off">
+      <b id="evFormTitle" style="font-size:14px">予定を追加</b>
+      <input id="evTitle" placeholder="予定の名前（例：打ち合わせ、衣装案を考える）" required maxlength="80">
+      <div class="form-row3">
+        <label>開始日<input id="evStart" type="date" required min="2026-01-01" max="2027-12-31"></label>
+        <label>終了日<input id="evEnd" type="date" required min="2026-01-01" max="2027-12-31"></label>
+        <label>種類<select id="evType"></select></label>
+        <label>色<select id="evColor">
+          <option value="">種類に合わせる</option><option value="maya">水色（Maya）</option><option value="md">オレンジ（MD）</option><option value="zb">紫（ZBrush）</option><option value="out">グレー（出力）</option><option value="unity">ピンク（Unity）</option>
+        </select></label>
+      </div>
+      <textarea id="evNote" placeholder="メモ（任意）" maxlength="500"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="submit" id="evSubmit">追加</button><button type="button" class="btn2" id="evCancel" hidden>編集をやめる</button></div>
+    </form>
   </section>
 </div>
 
@@ -795,7 +832,7 @@ showTab(location.hash.slice(1));
 // 共通
 const np=document.getElementById('np');
 np.innerHTML=PHASES.map(p=>'<option value="'+p.id+'">'+p.name+'</option>').join('');
-let tasks=[],loaded=false,members={a:'',b:''},materials=[],posts=[],unsubs=[];
+let tasks=[],loaded=false,members={a:'',b:''},materials=[],posts=[],events=[],unsubs=[];
 const st={owner:'all',hide:false};
 const LABEL={todo:'未着手',doing:'作業中',done:'完了'};
 const NEXT={todo:'doing',doing:'done',done:'todo'};
@@ -810,7 +847,7 @@ function arm(id,rerender){if(armed!==id){armed=id;rerender();setTimeout(()=>{if(
 // Firestore の保存場所：sotsusei/board（担当名）と、その下の tasks / materials / posts
 const boardRef=fsDoc(fbDb,'sotsusei','board');
 const col=n=>fsCollection(fbDb,'sotsusei','board',n);
-const tasksCol=col('tasks'), matsCol=col('materials'), postsCol=col('posts');
+const tasksCol=col('tasks'), matsCol=col('materials'), postsCol=col('posts'), eventsCol=col('events');
 const taskRef=id=>fsDoc(fbDb,'sotsusei','board','tasks',id);
 const who=()=>currentUser?(currentUser.displayName||currentUser.email.split('@')[0]):'';
 function note(t){document.getElementById('dbNote').textContent=t}
@@ -825,43 +862,153 @@ function renderHome(){
   const lim=new Date(today.getTime()+14*DAY);
   const up=tasks.filter(t=>t.status!=='done'&&t.due&&D(t.due)<=lim).sort((a,b)=>a.due<b.due?-1:1).slice(0,8);
   document.getElementById('upcoming').innerHTML=!loaded?'<div class="empty">読み込み中…</div>':up.length?up.map(t=>'<div class="up-item'+(D(t.due)<today?' late':'')+'"><span class="mono">'+fmt(D(t.due))+'</span><span>'+esc(t.title)+'</span><span class="muted" style="font-size:12.5px">'+esc(name(t.owner))+'</span></div>').join(''):'<div class="empty">2 週間以内に期限のタスクはありません。</div>';
+const lim2=iso(new Date(today.getTime()+21*DAY)), tk=iso(today);  const ue=events.filter(e=>(e.end||e.start)>=tk&&e.start<=lim2).sort((a,b)=>a.start<b.start?-1:1).slice(0,8);  document.getElementById('homeEvents').innerHTML=!loaded?'<div class="empty">読み込み中…</div>':ue.length?ue.map(e=>'<div class="up-item"><span class="mono">'+fmt(D(e.start))+(e.end&&e.end!==e.start?'–'+fmt(D(e.end)):'')+'</span><span>'+(evIcon(e)?'<i class="ic" style="--c:'+evColor(e)+';margin-right:5px">'+evIcon(e)+'</i>':'<i class="ph-mark" style="background:'+evColor(e)+';margin-right:6px"></i>')+esc(e.title)+'</span><span></span></div>').join(''):'<div class="empty">3 週間以内の予定はありません。カレンダーから追加できます。</div>';
   const hp=[...posts.filter(p=>p.pinned),...posts.filter(p=>!p.pinned).slice(0,3)];
   document.getElementById('homePosts').innerHTML=hp.length?hp.map(p=>postHTML(p,false)).join(''):'<div class="empty">まだ投稿はありません。</div>';
 }
 
 /* ---------- カレンダー ---------- */
-let calMonth=new Date(today.getFullYear(),today.getMonth(),1), calSel=iso(today);
-function dayEvents(key){
+// 予定の種類：アイコン（1文字）と既定の色
+const EVT={
+  meeting:{label:'打ち合わせ',ic:'打',c:'accent'},
+  check:{label:'進捗確認',ic:'確',c:'done'},
+  deadline:{label:'締切・決定',ic:'!',c:'high'},
+  work:{label:'作業',ic:'',c:'gen'},
+  holiday:{label:'休み',ic:'休',c:'muted'},
+  other:{label:'その他',ic:'',c:'gen'}
+};
+document.getElementById('evType').innerHTML=Object.entries(EVT).map(([k,v])=>'<option value="'+k+'">'+v.label+'</option>').join('');
+document.getElementById('evTypes').innerHTML=Object.entries(EVT).map(([k,v])=>'<span>'+(v.ic?'<i class="ic" style="--c:var(--'+v.c+')">'+v.ic+'</i>':'<i class="band'+(k==='holiday'?' holiday':'')+'" style="--c:var(--'+v.c+');width:22px;height:10px;margin:0"></i>')+v.label+'</span>').join('')+'<span><i class="ic" style="--c:var(--high)">!</i>工程の節目</span><span>◆ 受け渡しテスト</span><span>● タスクの期限</span>';
+const evColor=e=>'var(--'+(e.color||(EVT[e.type]||EVT.other).c)+')';
+const evIcon=e=>(EVT[e.type]||EVT.other).ic;
+let calMonth=new Date(today.getFullYear(),today.getMonth(),1), calSel=iso(today), editingEv=null;
+// その日の小さな表示（予定以外）
+function dayItems(key){
   const ev=[];
   MS.forEach(m=>{if(m[0]===key)ev.push({k:'ms',t:m[1]})});
   if(key==='2027-01-29')ev.push({k:'ms',t:'最終授業'});
-  TESTS.forEach(t=>{if(t[0]===key)ev.push({k:'tst',t:'◆テスト'+t[1]})});
+  TESTS.forEach(t=>{if(t[0]===key)ev.push({k:'tst',t:'テスト'+t[1]})});
   CLASSES.forEach(c=>{if(iso(c.d)===key)ev.push({k:'cls',t:c.w+'曜授業'})});
   tasks.filter(t=>t.due===key).sort((a,b)=>(a.order||0)-(b.order||0)).forEach(t=>ev.push({k:'task',t:t.title,c:phaseOf(t.phase).c,done:t.status==='done',owner:t.owner,status:t.status}));
   return ev;
 }
+const evOn=key=>events.filter(e=>e.start<=key&&key<=(e.end||e.start));
 function renderCal(){
   const y=calMonth.getFullYear(),m=calMonth.getMonth();
   document.getElementById('calTitle').textContent=y+'年 '+(m+1)+'月';
   const first=new Date(y,m,1), start=new Date(y,m,1-first.getDay());
-  let h=['日','月','火','水','木','金','土'].map(w=>'<div class="wd">'+w+'</div>').join('');
-  for(let i=0;i<42;i++){
-    const d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i);
-    if(i>=35&&d.getMonth()!==m)break;
-    const key=iso(d), ev=dayEvents(key);
-    const shown=ev.slice(0,4);
-    h+='<button type="button" class="cday'+(d.getMonth()!==m?' out':'')+(key===iso(today)?' today':'')+(key===calSel?' sel':'')+'" data-day="'+key+'"><span class="dn">'+d.getDate()+'</span>'+
-      shown.map(e=>'<span class="ev '+(e.k==='task'?'':e.k)+(e.done?' done':'')+'"'+(e.k==='task'?' style="border-left-color:var(--'+e.c+')"':'')+'>'+esc(e.t)+'</span>').join('')+
-      (ev.length>4?'<span class="ev more">ほか '+(ev.length-4)+' 件</span>':'')+'</button>';
+  const mobile=window.matchMedia('(max-width:720px)').matches, maxItems=mobile?2:3;
+  let h='<div class="cal-wd">'+['日','月','火','水','木','金','土'].map(w=>'<span>'+w+'</span>').join('')+'</div>';
+  for(let w=0;w<6;w++){
+    const ws=new Date(start.getFullYear(),start.getMonth(),start.getDate()+w*7);
+    if(w>0&&ws.getMonth()!==m)break;
+    const keys=[...Array(7)].map((_,i)=>iso(new Date(ws.getFullYear(),ws.getMonth(),ws.getDate()+i)));
+    // この週にかかる予定を、重ならないように段（レーン）へ割り振る
+    const wkEv=events.filter(e=>e.start<=keys[6]&&(e.end||e.start)>=keys[0]).sort((a,b)=>a.start<b.start?-1:a.start>b.start?1:((b.end||b.start)>(a.end||a.start)?1:-1));
+    const lanes=[];
+    const placed=wkEv.map(e=>{
+      const s=Math.max(0,keys.indexOf(e.start)<0?0:keys.indexOf(e.start)), en=keys.indexOf(e.end||e.start)<0?6:keys.indexOf(e.end||e.start);
+      let L=lanes.findIndex(l=>l.every(([a,b])=>en<a||s>b));if(L<0){L=lanes.length;lanes.push([])}lanes[L].push([s,en]);
+      return {e,s,en,L,cl:e.start<keys[0],cr:(e.end||e.start)>keys[6]};
+    });
+    const nL=lanes.length;
+    h+='<div class="wk" style="grid-template-rows:28px'+(nL?' repeat('+nL+',21px)':'')+' auto">';
+    keys.forEach((key,i)=>{const d=D(key);
+      h+='<button type="button" class="cday'+(d.getMonth()!==m?' out':'')+(key===iso(today)?' today':'')+(key===calSel?' sel':'')+'" data-day="'+key+'" style="grid-column:'+(i+1)+'" aria-label="'+(d.getMonth()+1)+'月'+d.getDate()+'日"><span class="dn">'+d.getDate()+'</span></button>'});
+    placed.forEach(p=>{const e=p.e,ic=evIcon(e);
+      h+='<button type="button" class="band'+(e.type==='holiday'?' holiday':'')+(p.cl?' cl':'')+(p.cr?' cr':'')+'" data-ev="'+esc(e.id)+'" style="grid-row:'+(p.L+2)+';grid-column:'+(p.s+1)+' / '+(p.en+2)+';--c:'+evColor(e)+'" title="'+esc(e.title)+'">'+(ic&&!p.cl?'<i class="ic">'+ic+'</i>':'')+'<span class="t">'+esc(e.title)+'</span></button>'});
+    keys.forEach((key,i)=>{
+      const it=dayItems(key).filter(x=>!(mobile&&x.k==='cls'));const shown=it.slice(0,maxItems);
+      if(!it.length)return;
+      h+='<div class="dits" style="grid-row:'+(nL+2)+';grid-column:'+(i+1)+'">'+shown.map(x=>
+        '<span class="ev '+(x.k==='task'?'':x.k)+(x.done?' done':'')+'"'+(x.k==='task'?' style="--c:var(--'+x.c+')"':'')+'>'+
+        (x.k==='task'?'<i class="dot"></i>':x.k==='ms'?'<i class="ic" style="--c:var(--high)">!</i>':x.k==='tst'?'◆':'')+'<span class="t">'+esc(x.t)+'</span></span>').join('')+
+        (it.length>maxItems?'<span class="ev more">ほか '+(it.length-maxItems)+' 件</span>':'')+'</div>';
+    });
+    h+='</div>';
   }
   document.getElementById('cal').innerHTML=h;
-  const ev=dayEvents(calSel), sd=D(calSel);
-  document.getElementById('calDay').innerHTML='<h3>'+(sd.getMonth()+1)+'/'+sd.getDate()+'（'+'日月火水木金土'[sd.getDay()]+'）の予定</h3>'+(ev.length?ev.map(e=>'<div class="up-item"><span class="mono">'+(e.k==='task'?'<span class="ph-mark" style="background:var(--'+e.c+')"></span>':'')+'</span><span'+(e.done?' style="text-decoration:line-through;color:var(--muted)"':'')+'>'+esc(e.t)+'</span><span class="muted" style="font-size:12.5px">'+(e.k==='task'?esc(name(e.owner))+' ・ '+LABEL[e.status]:e.k==='ms'?'締切・節目':e.k==='tst'?'受け渡しテスト':'')+'</span></div>').join(''):'<div class="empty">予定はありません。</div>');
+  renderCalDay();
 }
-document.getElementById('cal').addEventListener('click',e=>{const b=e.target.closest('[data-day]');if(b){calSel=b.dataset.day;renderCal()}});
+function renderCalDay(){
+  const sd=D(calSel), evs=evOn(calSel), items=dayItems(calSel);
+  let h='<h3>'+(sd.getMonth()+1)+'/'+sd.getDate()+'（'+'日月火水木金土'[sd.getDay()]+'）の予定</h3>';
+  h+=evs.map(e=>'<div class="up-item" data-ev="'+esc(e.id)+'"><span class="mono" style="font-size:12px">'+fmt(D(e.start))+(e.end&&e.end!==e.start?'–'+fmt(D(e.end)):'')+'</span><span>'+(evIcon(e)?'<i class="ic" style="--c:'+evColor(e)+';margin-right:5px">'+evIcon(e)+'</i>':'<i class="ph-mark" style="background:'+evColor(e)+';margin-right:6px"></i>')+esc(e.title)+(e.note?'<br><span class="muted" style="font-size:12.5px">'+esc(e.note)+'</span>':'')+'</span><span class="acts"><button type="button" data-act="evedit">編集</button><button type="button" data-act="evdel" class="'+(armed===e.id?'arm':'')+'">'+(armed===e.id?'本当に削除':'削除')+'</button></span></div>').join('');
+  h+=items.map(x=>'<div class="up-item"><span class="mono">'+(x.k==='task'?'<span class="ph-mark" style="background:var(--'+x.c+')"></span>':'')+'</span><span'+(x.done?' style="text-decoration:line-through;color:var(--muted)"':'')+'>'+esc(x.t)+'</span><span class="muted" style="font-size:12.5px">'+(x.k==='task'?esc(name(x.owner))+' ・ '+LABEL[x.status]:x.k==='ms'?'工程の節目':x.k==='tst'?'受け渡しテスト':'授業')+'</span></div>').join('');
+  if(!evs.length&&!items.length)h+='<div class="empty">予定はありません。下のフォームから追加できます。</div>';
+  document.getElementById('calDay').innerHTML=h;
+}
+function resetEvForm(){
+  editingEv=null;
+  document.getElementById('evFormTitle').textContent='予定を追加';
+  document.getElementById('evSubmit').textContent='追加';
+  document.getElementById('evCancel').hidden=true;
+  ['evTitle','evNote'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('evType').value='meeting';document.getElementById('evColor').value='';
+  document.getElementById('evStart').value=calSel;document.getElementById('evEnd').value=calSel;
+}
+function selectDay(key){
+  calSel=key;
+  if(!editingEv){document.getElementById('evStart').value=key;document.getElementById('evEnd').value=key}
+  renderCal();
+}
+document.getElementById('cal').addEventListener('click',e=>{
+  const band=e.target.closest('[data-ev]');
+  if(band){const ev=events.find(x=>x.id===band.dataset.ev);if(ev){calSel=ev.start>=iso(new Date(calMonth.getFullYear(),calMonth.getMonth(),1))?ev.start:calSel;selectDay(calSel);document.getElementById('calDay').scrollIntoView({behavior:'smooth',block:'nearest'})}return}
+  const b=e.target.closest('[data-day]');if(b)selectDay(b.dataset.day);
+});
+document.getElementById('calDay').addEventListener('click',async e=>{
+  const b=e.target.closest('button');if(!b)return;const row=b.closest('[data-ev]');if(!row)return;
+  const ev=events.find(x=>x.id===row.dataset.ev);if(!ev)return;
+  if(b.dataset.act==='evedit'){
+    editingEv=ev.id;
+    document.getElementById('evFormTitle').textContent='予定を編集';
+    document.getElementById('evSubmit').textContent='保存';
+    document.getElementById('evCancel').hidden=false;
+    document.getElementById('evTitle').value=ev.title||'';document.getElementById('evNote').value=ev.note||'';
+    document.getElementById('evStart').value=ev.start;document.getElementById('evEnd').value=ev.end||ev.start;
+    document.getElementById('evType').value=EVT[ev.type]?ev.type:'other';document.getElementById('evColor').value=ev.color||'';
+    document.getElementById('evForm').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+  if(b.dataset.act==='evdel'){if(!arm(ev.id,renderCalDay))return;try{await fsDeleteDoc(fsDoc(fbDb,'sotsusei','board','events',ev.id));if(editingEv===ev.id)resetEvForm()}catch(err){fail(err)}}
+});
+document.getElementById('evCancel').addEventListener('click',resetEvForm);
+document.getElementById('evStart').addEventListener('change',e=>{const en=document.getElementById('evEnd');if(!en.value||en.value<e.target.value)en.value=e.target.value});
+document.getElementById('evForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const s=document.getElementById('evStart').value, en=document.getElementById('evEnd').value||s;
+  if(en<s){const el=document.getElementById('evEnd');el.setCustomValidity('終了日は開始日以降にしてください');el.reportValidity();return}
+  const data={title:document.getElementById('evTitle').value.trim(),start:s,end:en,type:document.getElementById('evType').value,color:document.getElementById('evColor').value,note:document.getElementById('evNote').value.trim(),by:who(),updatedAt:Date.now()};
+  try{
+    if(editingEv)await fsUpdateDoc(fsDoc(fbDb,'sotsusei','board','events',editingEv),data);
+    else await fsAddDoc(eventsCol,Object.assign(data,{createdAt:Date.now()}));
+    resetEvForm();
+  }catch(err){fail(err,'予定を保存できませんでした。')}
+});
+document.getElementById('evEnd').addEventListener('input',e=>e.target.setCustomValidity(''));
 document.getElementById('calPrev').addEventListener('click',()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()-1,1);renderCal()});
 document.getElementById('calNext').addEventListener('click',()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+1,1);renderCal()});
-document.getElementById('calToday').addEventListener('click',()=>{calMonth=new Date(today.getFullYear(),today.getMonth(),1);calSel=iso(today);renderCal()});
+document.getElementById('calToday').addEventListener('click',()=>{calMonth=new Date(today.getFullYear(),today.getMonth(),1);selectDay(iso(today))});
+window.matchMedia('(max-width:720px)').addEventListener('change',()=>renderCal());
+resetEvForm();
+
+// 最初に登録しておく予定（一度だけ。消したものは戻らない）
+const SEED_EVENTS={
+  e20261003a:{title:'スケジュール仮決定',start:'2026-10-03',end:'2026-10-03',type:'deadline',color:'',note:''},
+  e20261003b:{title:'衣装案を考える（各自）',start:'2026-10-03',end:'2026-10-16',type:'work',color:'',note:'10/16 に共有、10/23 にすり合わせ'},
+  e20261007:{title:'打ち合わせ',start:'2026-10-07',end:'2026-10-07',type:'meeting',color:'',note:''},
+  e20261008:{title:'休暇',start:'2026-10-08',end:'2026-10-08',type:'holiday',color:'',note:''}
+};
+async function seedEventsOnce(){
+  try{
+    const snap=await fsGetDoc(boardRef);
+    if(snap.exists()&&snap.data().eventsSeeded)return;
+    const batch=fsWriteBatch(fbDb);
+    Object.entries(SEED_EVENTS).forEach(([id,e])=>batch.set(fsDoc(fbDb,'sotsusei','board','events',id),Object.assign({},e,{by:who(),createdAt:Date.now(),updatedAt:Date.now()})));
+    batch.set(boardRef,{eventsSeeded:true},{merge:true});
+    await batch.commit();
+  }catch(err){console.error(err)}
+}
 
 /* ---------- やることリスト ---------- */
 const open=new Set();
@@ -1008,6 +1155,8 @@ drawGantt();renderAll();
 window.startBoard=function(){
   if(unsubs.length)return;
   note('変更は二人の画面に自動で反映されます。');
+  seedEventsOnce();
+  unsubs.push(fsOnSnapshot(eventsCol,s=>{events=s.docs.map(d=>Object.assign({id:d.id},d.data()));renderHome();renderCal()},err=>console.error(err)));
   let got=0;const ready=()=>{if(++got===3){loaded=true;renderAll()}};
   let r1=false,r2=false,r3=false;
   unsubs.push(fsOnSnapshot(tasksCol,s=>{tasks=s.docs.map(d=>Object.assign({id:d.id},d.data()));if(!r1){r1=true;ready()}renderHome();renderCal();renderTasks()},err=>{fail(err,'タスクを読み込めませんでした。ページを再読み込みしてください。');if(!r1){r1=true;ready()}}));
@@ -1018,7 +1167,7 @@ window.startBoard=function(){
 };
 window.stopBoard=function(){
   unsubs.forEach(u=>u());unsubs=[];
-  tasks=[];materials=[];posts=[];loaded=false;renderAll();
+  tasks=[];materials=[];posts=[];events=[];loaded=false;renderAll();
 };
 if(currentUser&&allowed)window.startBoard();
 })();
