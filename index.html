@@ -251,6 +251,7 @@ img{max-width:100%}
 .ev.done{color:var(--muted);text-decoration:line-through}
 .ev.more{color:var(--muted)}
 .cday.rng{background:color-mix(in srgb,var(--accent) 16%,var(--surface))}
+.cday.pick{background:color-mix(in srgb,var(--accent) 22%,var(--surface));box-shadow:inset 0 0 0 2px var(--accent)}.band.cls{cursor:default;color:var(--muted);background:color-mix(in srgb,var(--muted) 12%,var(--surface));box-shadow:inset 3px 0 0 var(--muted)}.band.imp-mid .t,.band.imp-high .t{font-weight:800}.band.imp-high{box-shadow:inset 3px 0 0 var(--c),inset 0 0 0 1.5px var(--high)}.tag-s.mid{color:var(--doing)}.imp-sample{border:1.5px solid var(--high);border-radius:3px;padding:0 4px}.copybar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border:1.5px solid var(--accent);border-radius:6px;background:var(--surface);font-size:13.5px}.copybar .sp{flex:1}.copybar .cp-go{border:0;background:var(--accent);color:var(--surface);border-radius:4px;padding:6px 14px;font-weight:700}.copybar .cp-go:disabled{opacity:.5}.qp-acts .qp-copy{border:0;background:none;color:var(--accent);font-size:12.5px;padding:4px}
 .cal-head .add-ev{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
 .qpop{position:absolute;z-index:60;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 36px color-mix(in srgb,var(--ink) 24%,transparent);padding:12px;display:grid;gap:10px}
 .qpop #qpTitle{font:inherit;font-size:16px;font-weight:700;border:0;border-bottom:2px solid var(--line);padding:4px 2px;background:transparent;color:var(--ink);width:100%;outline:none}
@@ -585,7 +586,8 @@ body.present .blk{grid-template-columns:0 minmax(0,1fr)}
     <div class="sec-head"><h2>カレンダー</h2>
       <div class="cal-head"><button type="button" id="calPrev" aria-label="前の月">‹</button><b id="calTitle"></b><button type="button" id="calNext" aria-label="次の月">›</button><button type="button" id="calToday">今月</button><button type="button" id="calAdd" class="add-ev">＋ 予定</button></div>
     </div>
-    <p class="muted" style="margin:0;font-size:12.5px">日付を押すとその日に予定を追加、ドラッグすると複数日にまとめて追加できます。予定を押すと編集・削除できます。</p>
+    <p class="muted" style="margin:0;font-size:12.5px">日付をダブルクリックで予定を追加、ドラッグで複数日にまとめて追加できます。予定を押すと編集・削除・他の日へのコピーができます。</p>
+    <div class="copybar" id="copyBar" hidden></div>
     <div class="cal" id="cal"></div>
     <div class="ev-types" id="evTypes"></div>
     <div class="cal-day" id="calDay"></div>
@@ -963,10 +965,19 @@ const CLASS_KEYS=new Map(CLASSES.map(c=>[isoK(c.d),c.w]));
 function sessionsOn(key){
   const out=[], w=CLASS_KEYS.get(key), dow=D(key).getDay();
   if(w)out.push(Object.assign({k:'cls'},w==='木'?WORK.thu:WORK.fri));
+  if(boardFlags.eventsSeeded4){
+    // 打ち合わせはカレンダーの予定（時刻つき）から。昼食・休憩の分を引いた時間を作業時間にする
+    events.filter(e=>e.type==='meeting'&&e.time&&e.endTime&&e.start<=key&&key<=(e.end||e.start)).forEach(e=>{
+      const g=(hm(e.endTime)-hm(e.time))/60;
+      out.push({k:'meet',label:e.title,time:e.time+'–'+e.endTime,h:Math.max(0,g-(g>=4?1:0)-(g>=8?.5:0)),note:e.note||''});
+    });
+    return out;
+  }
   const off=events.some(e=>e.type==='holiday'&&e.start<=key&&key<=(e.end||e.start));
   if((dow===3||dow===6)&&key>=MEET_FROM&&key<=MEET_TO&&!MEET_SKIP.includes(key)&&!off)out.push(Object.assign({k:'meet'},dow===3?WORK.wed:WORK.sat));
   return out;
 }
+function hm(s){const [h,m]=String(s).split(':').map(Number);return h*60+(m||0)}
 // 今日からその日の前日までに使える作業時間
 function hoursUntil(toKey){let h=0;for(let d=new Date(today);isoK(d)<toKey;d.setDate(d.getDate()+1))sessionsOn(isoK(d)).forEach(s=>h+=s.h);return Math.round(h)}
 
@@ -1026,7 +1037,7 @@ const MS0=[['2026-10-15','企画案・スケジュール提出','s'],['2026-10-1
 // 締切・節目・受け渡しテストは、カレンダーの予定（events）に移したあとはそちらを使う。移す前は上の初期値を使う
 let boardFlags={};
 const fromEvents=()=>!!boardFlags.eventsSeeded3;
-function getMS(){return fromEvents()?events.filter(e=>e.type==='deadline').map(e=>[e.start,e.title,e.school?'s':'']).sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0):MS0}
+function getMS(){return fromEvents()?events.filter(e=>e.type==='deadline').map(e=>[e.start,e.title,e.imp||(e.school?'high':'')]).sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0):MS0.map(m=>[m[0],m[1],m[2]==='s'?'high':''])}
 function getTESTS(){return fromEvents()?events.filter(e=>e.test).map(e=>[e.start,e.test]).sort((a,b)=>a[0]<b[0]?-1:1):TESTS0}
 
 // stats
@@ -1082,7 +1093,7 @@ function renderDeadlines(){
   const DL=[...getMS()].sort((a,b)=>a[0]<b[0]?-1:1);
   const nextIdx=DL.findIndex(m=>D(m[0])>=today);
   document.getElementById('deadlines').innerHTML=DL.map((m,i)=>{const n=diff(D(m[0]),today);
-    return '<div class="dl-row'+(n<0?' past':'')+(i===nextIdx?' next':'')+'"><span class="mono">'+fmt(D(m[0]))+'</span><span>'+(m[2]==='s'?'<span class="tag-s">学校</span>':'')+m[1]+(n>0?'<br><span class="left">作業できる時間 約 '+hoursUntil(m[0])+' 時間</span>':'')+'</span><span>'+(n<0?'<span class="left">済</span>':n===0?'<b>今日</b>':'<span class="left">あと</span> <b>'+n+'</b><span class="left">日</span>')+'</span></div>'}).join('');
+    return '<div class="dl-row'+(n<0?' past':'')+(i===nextIdx?' next':'')+'"><span class="mono">'+fmt(D(m[0]))+'</span><span>'+impTag(m[2])+m[1]+(n>0?'<br><span class="left">作業できる時間 約 '+hoursUntil(m[0])+' 時間</span>':'')+'</span><span>'+(n<0?'<span class="left">済</span>':n===0?'<b>今日</b>':'<span class="left">あと</span> <b>'+n+'</b><span class="left">日</span>')+'</span></div>'}).join('');
   if(nextIdx>=0&&document.getElementById('sNext')){document.getElementById('sNext').textContent=diff(D(DL[nextIdx][0]),today);document.getElementById('sNextLabel').textContent='次の締切「'+DL[nextIdx][1]+'」まで（日）'}
 }
 
@@ -1140,41 +1151,47 @@ const lim2=iso(new Date(today.getTime()+21*DAY)), tk=iso(today);  const ue=event
 }
 
 /* ---------- カレンダー ---------- */
-// 予定の種類：アイコン（1文字）と既定の色
+// 予定の種類と既定の色（アイコンは色の丸だけ）
 const EVT={
-  meeting:{label:'打ち合わせ',ic:'打',c:'accent'},
-  check:{label:'進捗確認',ic:'確',c:'done'},
-  deadline:{label:'締切・決定',ic:'!',c:'high'},
+  meeting:{label:'打ち合わせ',ic:'●',c:'accent'},
+  check:{label:'進捗確認',ic:'●',c:'done'},
+  deadline:{label:'締切・決定',ic:'●',c:'high'},
   work:{label:'作業',ic:'',c:'gen'},
-  holiday:{label:'休み',ic:'休',c:'muted'},
+  holiday:{label:'休み',ic:'●',c:'muted'},
   other:{label:'その他',ic:'',c:'gen'}
 };
-document.getElementById('evTypes').innerHTML=Object.entries(EVT).map(([k,v])=>'<span>'+(v.ic?'<i class="ic" style="--c:var(--'+v.c+')">'+v.ic+'</i>':'<i class="band'+(k==='holiday'?' holiday':'')+'" style="--c:var(--'+v.c+');width:22px;height:10px;margin:0"></i>')+v.label+'</span>').join('')+'<span><i class="ic" style="--c:var(--high)">!</i>工程の節目</span><span><i class="ic" style="--c:var(--ink)"></i>受け渡しテスト</span><span><i class="ic" style="--c:var(--maya)"></i>タスクの期限（工程の色）</span><span><i style="display:inline-block;width:16px;height:11px;border-radius:2px;background:color-mix(in srgb,var(--high) 12%,var(--surface));border:1px solid var(--high)"></i>学校の提出・報告の日</span>';
+const IMP={'':'通常',mid:'重要',high:'最重要'};
+const impOf=e=>e.imp||(e.school?'high':'');
+document.getElementById('evTypes').innerHTML=Object.entries(EVT).map(([k,v])=>'<span>'+(v.ic?'<i class="ic" style="--c:var(--'+v.c+')"></i>':'<i class="band'+(k==='holiday'?' holiday':'')+'" style="--c:var(--'+v.c+');width:22px;height:10px;margin:0"></i>')+v.label+'</span>').join('')+
+  '<span><i class="ic" style="--c:var(--muted)"></i>授業</span><span><i class="ic" style="--c:var(--maya)"></i>タスクの期限（工程の色）</span><span><b>太字</b>＝重要</span><span><b class="imp-sample">赤枠</b>＝最重要</span>';
 const evColor=e=>'var(--'+(e.color||(EVT[e.type]||EVT.other).c)+')';
 const evIcon=e=>(EVT[e.type]||EVT.other).ic;
+const evTime=e=>e.time?e.time+(e.endTime?'–'+e.endTime:'〜'):'';
+const isMeet=e=>!!boardFlags.eventsSeeded4&&e.type==='meeting'&&!!e.time&&!!e.endTime;
 let calMonth=new Date(today.getFullYear(),today.getMonth(),1), calSel=iso(today), editingEv=null;
-// その日の小さな表示（予定以外）
-function dayItems(key){
+// その日の小さな表示（予定以外）。withSessions のときは授業・打ち合わせの時間も含める
+function dayItems(key,withSessions){
   const ev=[];
   if(!fromEvents())MS0.forEach(m=>{if(m[0]===key)ev.push({k:'ms',t:m[1]})});
-
   if(!fromEvents())TESTS0.forEach(t=>{if(t[0]===key)ev.push({k:'tst',t:'テスト'+t[1]})});
-  sessionsOn(key).forEach(s=>ev.push({k:s.k,t:(s.k==='cls'?'授業 ':'集合 ')+s.time,h:s.h,label:s.label,note:s.note}));
+  if(withSessions)sessionsOn(key).forEach(s=>ev.push({k:s.k,t:(s.k==='cls'?'授業 ':s.label+' ')+s.time,h:s.h,label:s.label,note:s.note}));
+  else if(!boardFlags.eventsSeeded4)sessionsOn(key).filter(s=>s.k==='meet').forEach(s=>ev.push({k:'meet',t:s.time.split('–')[0]+'〜 '+s.label,h:s.h}));
   tasks.filter(t=>t.due===key).sort((a,b)=>(a.order||0)-(b.order||0)).forEach(t=>ev.push({k:'task',t:t.title,c:phaseOf(t.phase).c,done:t.status==='done',owner:t.owner,status:t.status}));
   return ev;
 }
 const evOn=key=>events.filter(e=>e.start<=key&&key<=(e.end||e.start));
-// 1 週間の作業時間と、学校の節目までに使える時間
+// 1 週間の作業時間と、最重要の締切までに使える時間
 function renderWork(){
   const rows=[['水',WORK.wed],['木',WORK.thu],['金',WORK.fri],['土',WORK.sat]];
   const total=rows.reduce((a,[,w])=>a+w.h,0);
-  const goals=getMS().filter(m=>m[2]==='s'&&m[0]>isoK(today));
+  const goals=getMS().filter(m=>m[2]==='high'&&m[0]>isoK(today));
   document.getElementById('workHours').innerHTML='<h4>作業時間の目安（1 人あたり）</h4>'+
     '<div class="dl">'+rows.map(([d,w])=>'<div class="dl-row"><span class="mono">'+d+'曜</span><span>'+w.label+'　<span class="mono">'+w.time+'</span><br><span class="left">'+w.note+'</span></span><span><b>'+w.h+'</b><span class="left">時間</span></span></div>').join('')+
     '<div class="dl-row"><span class="mono">1 週間</span><span>合計（休みの週・授業のない週は少なくなる）</span><span><b>'+total+'</b><span class="left">時間</span></span></div></div>'+
-    (goals.length?'<h4 style="margin-top:14px">学校の節目までに使える時間</h4><div class="dl">'+goals.map(m=>'<div class="dl-row"><span class="mono">'+fmt(D(m[0]))+'</span><span>'+m[1]+'</span><span><span class="left">約</span> <b>'+hoursUntil(m[0])+'</b><span class="left">時間</span></span></div>').join('')+'</div>':'')+
-    '<p class="muted" style="margin:10px 0 0;font-size:12.5px">水・土の集まりは 10/17〜1/27 で計算（12/30・1/2 は年末年始のため除外）。カレンダーに「休み」の予定を入れた日は集まりから除きます。授業は実際には少し短くなる見込みです。</p>';
+    (goals.length?'<h4 style="margin-top:14px">最重要の締切までに使える時間</h4><div class="dl">'+goals.map(m=>'<div class="dl-row"><span class="mono">'+fmt(D(m[0]))+'</span><span>'+m[1]+'</span><span><span class="left">約</span> <b>'+hoursUntil(m[0])+'</b><span class="left">時間</span></span></div>').join('')+'</div>':'')+
+    '<p class="muted" style="margin:10px 0 0;font-size:12.5px">水・土の打ち合わせは、カレンダーに入っている打ち合わせの予定（時刻つき）から計算します。昼食・休憩の分を引いています。授業は実際には少し短くなる見込みです。</p>';
 }
+function bandLabel(e){const t=e.time?e.time+'〜 ':'';return esc(t+e.title)}
 function renderCal(){
   renderWork();
   const y=calMonth.getFullYear(),m=calMonth.getMonth();
@@ -1186,50 +1203,63 @@ function renderCal(){
     const ws=new Date(start.getFullYear(),start.getMonth(),start.getDate()+w*7);
     if(w>0&&ws.getMonth()!==m)break;
     const keys=[...Array(7)].map((_,i)=>iso(new Date(ws.getFullYear(),ws.getMonth(),ws.getDate()+i)));
-    // この週にかかる予定を、重ならないように段（レーン）へ割り振る
-    const wkEv=events.filter(e=>e.start<=keys[6]&&(e.end||e.start)>=keys[0]).sort((a,b)=>a.start<b.start?-1:a.start>b.start?1:((b.end||b.start)>(a.end||a.start)?1:-1));
-    const lanes=[];
-    const placed=wkEv.map(e=>{
-      const s=Math.max(0,keys.indexOf(e.start)<0?0:keys.indexOf(e.start)), en=keys.indexOf(e.end||e.start)<0?6:keys.indexOf(e.end||e.start);
-      let L=lanes.findIndex(l=>l.every(([a,b])=>en<a||s>b));if(L<0){L=lanes.length;lanes.push([])}lanes[L].push([s,en]);
-      return {e,s,en,L,cl:e.start<keys[0],cr:(e.end||e.start)>keys[6]};
+    // 授業と打ち合わせ（1 日だけ・時刻つき）は、毎週同じ位置（いちばん上の段）にそろえる
+    const cls=keys.map((k,i)=>CLASS_KEYS.get(k)?{pseudo:true,s:i,en:i,title:'授業 '+(CLASS_KEYS.get(k)==='木'?WORK.thu.time:WORK.fri.time).split('–')[0]+'〜'}:null).filter(Boolean);
+    const wkEv=events.filter(e=>e.start<=keys[6]&&(e.end||e.start)>=keys[0]);
+    const top=wkEv.filter(e=>e.type==='meeting'&&(e.end||e.start)===e.start).sort((a,b)=>a.start<b.start?-1:1);
+    const rest=wkEv.filter(e=>!top.includes(e)).sort((a,b)=>a.start<b.start?-1:a.start>b.start?1:((b.end||b.start)>(a.end||a.start)?1:-1));
+    const lanes=[], place=(s,en)=>{let L=lanes.findIndex(l=>l.every(([a,b])=>en<a||s>b));if(L<0){L=lanes.length;lanes.push([])}lanes[L].push([s,en]);return L};
+    const placed=[];
+    cls.forEach(c=>placed.push(Object.assign(c,{L:place(c.s,c.en)})));
+    [...top,...rest].forEach(e=>{
+      const s=keys.indexOf(e.start)<0?0:keys.indexOf(e.start), en=keys.indexOf(e.end||e.start)<0?6:keys.indexOf(e.end||e.start);
+      placed.push({e,s,en,L:place(s,en),cl:e.start<keys[0],cr:(e.end||e.start)>keys[6]});
     });
     const nL=lanes.length;
     h+='<div class="wk" style="grid-template-rows:28px'+(nL?' repeat('+nL+',21px)':'')+' auto">';
     keys.forEach((key,i)=>{const d=D(key);
-      h+='<button type="button" class="cday'+(d.getMonth()!==m?' out':'')+(getMS().some(x=>x[0]===key&&x[2]==='s')?' sch':'')+(key===iso(today)?' today':'')+(key===calSel?' sel':'')+'" data-day="'+key+'" style="grid-column:'+(i+1)+'" aria-label="'+(d.getMonth()+1)+'月'+d.getDate()+'日"><span class="dn">'+d.getDate()+'</span></button>'});
-    placed.forEach(p=>{const e=p.e,ic=evIcon(e);
-      h+='<button type="button" class="band'+(e.type==='holiday'?' holiday':'')+(p.cl?' cl':'')+(p.cr?' cr':'')+'" data-ev="'+esc(e.id)+'" style="grid-row:'+(p.L+2)+';grid-column:'+(p.s+1)+' / '+(p.en+2)+';--c:'+evColor(e)+'" title="'+esc(e.title)+'">'+(ic&&!p.cl?'<i class="ic">'+ic+'</i>':'')+'<span class="t">'+esc(e.title)+'</span></button>'});
+      h+='<div class="cday'+(d.getMonth()!==m?' out':'')+(key===iso(today)?' today':'')+(key===calSel?' sel':'')+(copyMode&&copyMode.days.has(key)?' pick':'')+'" data-day="'+key+'" style="grid-column:'+(i+1)+'" role="button" tabindex="-1" aria-label="'+(d.getMonth()+1)+'月'+d.getDate()+'日"><span class="dn">'+d.getDate()+'</span></div>'});
+    placed.forEach(p=>{
+      if(p.pseudo){h+='<div class="band cls" style="grid-row:'+(p.L+2)+';grid-column:'+(p.s+1)+' / '+(p.en+2)+';--c:var(--muted)"><i class="ic"></i><span class="t">'+p.title+'</span></div>';return}
+      const e=p.e,ic=evIcon(e),imp=impOf(e);
+      h+='<button type="button" class="band'+(e.type==='holiday'?' holiday':'')+(p.cl?' cl':'')+(p.cr?' cr':'')+(imp?' imp-'+imp:'')+'" data-ev="'+esc(e.id)+'" style="grid-row:'+(p.L+2)+';grid-column:'+(p.s+1)+' / '+(p.en+2)+';--c:'+evColor(e)+'" title="'+esc((evTime(e)?evTime(e)+' ':'')+e.title)+'">'+(ic&&!p.cl?'<i class="ic"></i>':'')+'<span class="t">'+bandLabel(e)+'</span></button>'});
     keys.forEach((key,i)=>{
-      const it=dayItems(key).filter(x=>!(mobile&&x.k==='cls'));const shown=it.slice(0,maxItems);
+      const it=dayItems(key,false);const shown=it.slice(0,maxItems);
       if(!it.length)return;
       h+='<div class="dits" style="grid-row:'+(nL+2)+';grid-column:'+(i+1)+'">'+shown.map(x=>
         '<span class="ev '+(x.k==='task'?'':x.k)+(x.done?' done':'')+'"'+(x.k==='task'?' style="--c:var(--'+x.c+')"':'')+'>'+
-        (x.k==='task'?'<i class="dot"></i>':x.k==='ms'?'<i class="ic" style="--c:var(--high)">!</i>':x.k==='meet'?'<i class="ic" style="--c:var(--accent)">集</i>':x.k==='tst'?'<i class="ic" style="--c:var(--ink)"></i>':'')+'<span class="t">'+esc(x.t)+'</span></span>').join('')+
+        (x.k==='task'?'<i class="dot"></i>':x.k==='ms'?'<i class="ic" style="--c:var(--high)"></i>':x.k==='meet'?'<i class="ic" style="--c:var(--accent)"></i>':x.k==='tst'?'<i class="ic" style="--c:var(--ink)"></i>':'')+'<span class="t">'+esc(x.t)+'</span></span>').join('')+
         (it.length>maxItems?'<span class="ev more">ほか '+(it.length-maxItems)+' 件</span>':'')+'</div>';
     });
     h+='</div>';
   }
   document.getElementById('cal').innerHTML=h;
-  renderCalDay();paintRange();
+  renderCalDay();paintRange();renderCopyBar();
 }
+const impTag=l=>l==='high'?'<span class="tag-s">最重要</span>':l==='mid'?'<span class="tag-s mid">重要</span>':'';
 function renderCalDay(){
-  const sd=D(calSel), evs=evOn(calSel), items=dayItems(calSel);
+  const sd=D(calSel), evs=evOn(calSel).sort((a,b)=>(a.time||'99')<(b.time||'99')?-1:1), items=dayItems(calSel,true).filter(x=>!(x.k==='meet'&&boardFlags.eventsSeeded4));
   let h='<h3>'+(sd.getMonth()+1)+'/'+sd.getDate()+'（'+'日月火水木金土'[sd.getDay()]+'）の予定</h3>';
-  h+=evs.map(e=>'<div class="up-item" data-ev="'+esc(e.id)+'"><span class="mono" style="font-size:12px">'+fmt(D(e.start))+(e.end&&e.end!==e.start?'–'+fmt(D(e.end)):'')+'</span><span>'+(evIcon(e)?'<i class="ic" style="--c:'+evColor(e)+';margin-right:5px">'+evIcon(e)+'</i>':'<i class="ph-mark" style="background:'+evColor(e)+';margin-right:6px"></i>')+esc(e.title)+(e.note?'<br><span class="muted" style="font-size:12.5px">'+esc(e.note)+'</span>':'')+'</span><span class="acts"><button type="button" data-act="evedit">編集</button><button type="button" data-act="evdel" class="'+(armed===e.id?'arm':'')+'">'+(armed===e.id?'本当に削除':'削除')+'</button></span></div>').join('');
-  h+=items.map(x=>'<div class="up-item"><span class="mono">'+(x.k==='task'?'<span class="ph-mark" style="background:var(--'+x.c+')"></span>':'')+'</span><span'+(x.done?' style="text-decoration:line-through;color:var(--muted)"':'')+'>'+esc(x.t)+'</span><span class="muted" style="font-size:12.5px">'+(x.k==='task'?esc(name(x.owner))+' ・ '+LABEL[x.status]:x.k==='ms'?'工程の節目':x.k==='tst'?'受け渡しテスト':'約 '+x.h+' 時間（'+x.note+'）')+'</span></div>').join('');
-  if(!evs.length&&!items.length)h+='<div class="empty">予定はありません。カレンダーの日付を押すと追加できます。</div>';
+  h+=evs.map(e=>'<div class="up-item" data-ev="'+esc(e.id)+'"><span class="mono" style="font-size:12px">'+(evTime(e)||(fmt(D(e.start))+(e.end&&e.end!==e.start?'–'+fmt(D(e.end)):'')))+'</span><span>'+impTag(impOf(e))+'<i class="ic" style="--c:'+evColor(e)+';margin-right:6px"></i>'+esc(e.title)+(e.note?'<br><span class="muted" style="font-size:12.5px">'+esc(e.note)+'</span>':'')+'</span><span class="acts"><button type="button" data-act="evedit">編集</button><button type="button" data-act="evcopy">コピー</button><button type="button" data-act="evdel" class="'+(armed===e.id?'arm':'')+'">'+(armed===e.id?'本当に削除':'削除')+'</button></span></div>').join('');
+  h+=items.map(x=>'<div class="up-item"><span class="mono">'+(x.k==='task'?'<span class="ph-mark" style="background:var(--'+x.c+')"></span>':'')+'</span><span'+(x.done?' style="text-decoration:line-through;color:var(--muted)"':'')+'>'+esc(x.t)+'</span><span class="muted" style="font-size:12.5px">'+(x.k==='task'?esc(name(x.owner))+' ・ '+LABEL[x.status]:x.k==='ms'?'工程の節目':x.k==='tst'?'受け渡しテスト':'約 '+x.h+' 時間'+(x.note?'（'+x.note+'）':''))+'</span></div>').join('');
+  if(!evs.length&&!items.length)h+='<div class="empty">予定はありません。日付をダブルクリックすると追加できます。</div>';
   document.getElementById('calDay').innerHTML=h;
 }
 /* 予定の追加・編集：TimeTree のように、押したところに小さな入力画面を開く */
 const pop=document.createElement('div');pop.className='qpop';pop.hidden=true;pop.setAttribute('role','dialog');pop.setAttribute('aria-label','予定');
 document.body.appendChild(pop);
 const QP_COLORS=['','maya','md','zb','unity','out','high'];
-let qp=null, qpArm=false;
-function selectDay(key){calSel=key;renderCal()}
+let qp=null, qpArm=false, copyMode=null;
+// 日付を選ぶだけのときはカレンダーを作り直さない（作り直すとダブルクリックが途切れるため）
+function selectDay(key){
+  calSel=key;
+  const shown=document.querySelector('#cal [data-day="'+key+'"]');
+  if(!shown){calMonth=new Date(D(key).getFullYear(),D(key).getMonth(),1);renderCal();return}
+  document.querySelectorAll('#cal .cday.sel').forEach(c=>c.classList.remove('sel'));shown.classList.add('sel');renderCalDay();
+}
 function paintRange(){
   document.querySelectorAll('#cal .cday.rng').forEach(c=>c.classList.remove('rng'));
-  const r=qp&&!qp.id?[qp.start,qp.end]:drag?[drag.a<drag.b?drag.a:drag.b,drag.a<drag.b?drag.b:drag.a]:null;
+  const r=qp&&!qp.id?[qp.start,qp.end]:drag&&drag.a!==drag.b?[drag.a<drag.b?drag.a:drag.b,drag.a<drag.b?drag.b:drag.a]:null;
   if(r)document.querySelectorAll('#cal .cday').forEach(c=>{const k=c.dataset.day;if(k>=r[0]&&k<=r[1])c.classList.add('rng')});
 }
 function closePop(){if(!qp)return;qp=null;pop.hidden=true;paintRange()}
@@ -1237,44 +1267,67 @@ function drawPop(){
   const isEdit=!!qp.id;
   pop.innerHTML='<input id="qpTitle" placeholder="予定を入力" maxlength="80" value="'+esc(qp.title)+'">'+
     '<div class="qp-row"><input type="date" id="qpStart" value="'+qp.start+'" aria-label="開始日"><span>〜</span><input type="date" id="qpEnd" value="'+qp.end+'" aria-label="終了日"></div>'+
+    '<div class="qp-row"><input type="time" id="qpTime" value="'+(qp.time||'')+'" step="300" aria-label="開始時刻"><span>〜</span><input type="time" id="qpEndTime" value="'+(qp.endTime||'')+'" step="300" aria-label="終了時刻"><span class="muted" style="font-size:11.5px;white-space:nowrap">時刻は任意</span></div>'+
     '<div class="qp-types">'+Object.entries(EVT).map(([k,v])=>'<button type="button" data-type="'+k+'" aria-pressed="'+(qp.type===k)+'"><i class="ic" style="--c:var(--'+v.c+')"></i>'+v.label+'</button>').join('')+'</div>'+
+    '<div class="qp-types qp-imp"><span class="muted" style="font-size:12px;align-self:center">重要度</span>'+Object.entries(IMP).map(([k,v])=>'<button type="button" data-imp="'+k+'" aria-pressed="'+((qp.imp||'')===k)+'">'+v+'</button>').join('')+'</div>'+
     '<div class="qp-colors"><span class="muted">色</span>'+QP_COLORS.map(c=>'<button type="button" class="sw'+(c?'':' auto')+'" data-color="'+c+'" aria-pressed="'+((qp.color||'')===c)+'" title="'+(c?c:'種類に合わせる')+'" style="--c:var(--'+(c||(EVT[qp.type]||EVT.other).c)+')">'+(c?'':'自')+'</button>').join('')+'</div>'+
-    (qp.type==='deadline'?'<label class="qp-sch"><input type="checkbox" id="qpSchool"'+(qp.school?' checked':'')+'> 学校の提出・報告（カレンダーを薄い赤に）</label>':'')+
     '<textarea id="qpNote" rows="2" placeholder="メモ（任意）" maxlength="500">'+esc(qp.note)+'</textarea>'+
-    '<div class="qp-acts">'+(isEdit?'<button type="button" class="qp-del'+(qpArm?' arm':'')+'">'+(qpArm?'本当に削除':'削除')+'</button>':'')+'<span class="sp"></span><button type="button" class="btn2 qp-cancel">閉じる</button><button type="button" class="qp-save">'+(isEdit?'保存':'追加')+'</button></div>';
+    '<div class="qp-acts">'+(isEdit?'<button type="button" class="qp-del'+(qpArm?' arm':'')+'">'+(qpArm?'本当に削除':'削除')+'</button><button type="button" class="qp-copy">他の日にコピー</button>':'')+'<span class="sp"></span><button type="button" class="btn2 qp-cancel">閉じる</button><button type="button" class="qp-save">'+(isEdit?'保存':'追加')+'</button></div>';
 }
 function openPop(rect,data){
-  qp=Object.assign({id:null,title:'',type:'meeting',color:'',note:'',school:false},data);qpArm=false;
+  qp=Object.assign({id:null,title:'',type:'meeting',color:'',note:'',imp:'',time:'',endTime:''},data);qpArm=false;
   drawPop();pop.hidden=false;
-  const w=Math.min(320,window.innerWidth-24), x=Math.max(12,Math.min(rect.left+window.scrollX,window.scrollX+window.innerWidth-w-12));
-  let y=rect.bottom+window.scrollY+6;
-  pop.style.width=w+'px';pop.style.left=x+'px';pop.style.top=y+'px';
+  const w=Math.min(330,window.innerWidth-24), x=Math.max(12,Math.min(rect.left+window.scrollX,window.scrollX+window.innerWidth-w-12));
+  pop.style.width=w+'px';pop.style.left=x+'px';pop.style.top=(rect.bottom+window.scrollY+6)+'px';
   const ph=pop.offsetHeight;if(rect.bottom+6+ph>window.innerHeight&&rect.top-ph-6>0)pop.style.top=(rect.top+window.scrollY-ph-6)+'px';
   paintRange();
   const t=document.getElementById('qpTitle');t.focus();t.select();
 }
+const evData=ev=>({id:ev.id,title:ev.title||'',start:ev.start,end:ev.end||ev.start,type:EVT[ev.type]?ev.type:'other',color:ev.color||'',note:ev.note||'',imp:impOf(ev),time:ev.time||'',endTime:ev.endTime||''});
 function readPop(){
-  const sc=document.getElementById('qpSchool');if(sc)qp.school=sc.checked;
   qp.title=document.getElementById('qpTitle').value;qp.note=document.getElementById('qpNote').value;
   qp.start=document.getElementById('qpStart').value||qp.start;qp.end=document.getElementById('qpEnd').value||qp.start;
+  qp.time=document.getElementById('qpTime').value;qp.endTime=document.getElementById('qpEndTime').value;
   if(qp.end<qp.start)[qp.start,qp.end]=[qp.end,qp.start];
+  if(!qp.time)qp.endTime='';
 }
+const evPayload=q=>({title:q.title.trim(),start:q.start,end:q.end,type:q.type,color:q.color||'',note:(q.note||'').trim(),imp:q.imp||'',time:q.time||'',endTime:q.endTime||'',school:q.imp==='high',by:who(),updatedAt:Date.now()});
 async function savePop(){
-  readPop();const title=qp.title.trim();
-  if(!title){const t=document.getElementById('qpTitle');t.focus();t.placeholder='予定の名前を入れてください';return}
-  const data={title,start:qp.start,end:qp.end,type:qp.type,color:qp.color||'',note:qp.note.trim(),school:qp.type==='deadline'&&!!qp.school,by:who(),updatedAt:Date.now()};
-  const id=qp.id;closePop();
+  readPop();
+  if(!qp.title.trim()){const t=document.getElementById('qpTitle');t.focus();t.placeholder='予定の名前を入れてください';return}
+  const data=evPayload(qp), id=qp.id;closePop();
   try{
     if(id)await fsUpdateDoc(fsDoc(fbDb,'sotsusei','board','events',id),data);
     else await fsAddDoc(eventsCol,Object.assign(data,{createdAt:Date.now()}));
   }catch(err){fail(err,'予定を保存できませんでした。')}
 }
+// 他の日へのコピー：コピー元を覚えて、カレンダーで日付を選ぶ
+function startCopy(src){copyMode={src,days:new Set()};closePop();renderCal();document.getElementById('copyBar').scrollIntoView({behavior:'smooth',block:'nearest'})}
+function renderCopyBar(){
+  const bar=document.getElementById('copyBar');
+  if(!copyMode){bar.hidden=true;return}
+  bar.hidden=false;
+  bar.innerHTML='<span>「'+esc(copyMode.src.title)+'」をコピーする日付を押してください（'+copyMode.days.size+' 日選択中）</span><span class="sp"></span><button type="button" class="btn2" data-cp="cancel">やめる</button><button type="button" class="cp-go" data-cp="go"'+(copyMode.days.size?'':' disabled')+'>'+copyMode.days.size+' 日にコピー</button>';
+}
+document.getElementById('copyBar').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-cp]');if(!b||!copyMode)return;
+  if(b.dataset.cp==='cancel'){copyMode=null;renderCal();return}
+  const src=copyMode.src, days=[...copyMode.days].sort(), span=diff(D(src.end||src.start),D(src.start));
+  copyMode=null;renderCal();
+  try{
+    const batch=fsWriteBatch(fbDb),now=Date.now();
+    days.forEach(k=>{const en=new Date(D(k));en.setDate(en.getDate()+span);batch.set(fsDoc(eventsCol),Object.assign(evPayload(Object.assign({},src,{start:k,end:iso(en)})),{createdAt:now}))});
+    await batch.commit();
+  }catch(err){fail(err,'コピーできませんでした。')}
+});
 pop.addEventListener('click',async e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.type){readPop();qp.type=b.dataset.type;drawPop();return}
+  if(b.dataset.imp!==undefined){readPop();qp.imp=b.dataset.imp;drawPop();return}
   if(b.dataset.color!==undefined){readPop();qp.color=b.dataset.color;drawPop();return}
   if(b.classList.contains('qp-cancel'))return closePop();
   if(b.classList.contains('qp-save'))return savePop();
+  if(b.classList.contains('qp-copy')){readPop();return startCopy(Object.assign({},qp))}
   if(b.classList.contains('qp-del')){
     if(!qpArm){readPop();qpArm=true;drawPop();return}
     const id=qp.id;closePop();try{await fsDeleteDoc(fsDoc(fbDb,'sotsusei','board','events',id))}catch(err){fail(err)}
@@ -1285,35 +1338,46 @@ pop.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&e.target.id==='qpTitle'&&!e.isComposing&&e.keyCode!==229){e.preventDefault();savePop()}
 });
 pop.addEventListener('change',e=>{if(e.target.id==='qpStart'||e.target.id==='qpEnd'){readPop();if(!qp.id)paintRange()}});
-document.addEventListener('mousedown',e=>{if(qp&&!pop.contains(e.target)&&!e.target.closest('#cal [data-day],#cal [data-ev],#calDay [data-ev],#calAdd'))closePop()});
+document.addEventListener('mousedown',e=>{if(qp&&!pop.contains(e.target)&&!e.target.closest('#cal [data-ev],#calDay [data-ev],#calAdd'))closePop()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&copyMode){copyMode=null;renderCal()}});
 
-// 日付を押す → その日に追加。ドラッグ → 複数日にまとめて追加
+// 押す → その日を選ぶ。ダブルクリック → その日に追加。ドラッグ → 複数日にまとめて追加
 let drag=null;
 const calEl=document.getElementById('cal');
 calEl.addEventListener('mousedown',e=>{
-  if(e.button!==0||e.target.closest('[data-ev]'))return;
+  if(e.button!==0||e.target.closest('[data-ev]')||copyMode)return;
   const c=e.target.closest('[data-day]');if(!c)return;
-  e.preventDefault();drag={a:c.dataset.day,b:c.dataset.day};closePop();paintRange();
+  drag={a:c.dataset.day,b:c.dataset.day};
 });
 calEl.addEventListener('mouseover',e=>{if(!drag)return;const c=e.target.closest('[data-day]');if(c&&c.dataset.day!==drag.b){drag.b=c.dataset.day;paintRange()}});
-document.addEventListener('mouseup',e=>{
+document.addEventListener('mouseup',()=>{
   if(!drag)return;
-  const s=drag.a<drag.b?drag.a:drag.b, en=drag.a<drag.b?drag.b:drag.a, endKey=drag.b;drag=null;
+  const s=drag.a<drag.b?drag.a:drag.b, en=drag.a<drag.b?drag.b:drag.a, endKey=drag.b, multi=drag.a!==drag.b;drag=null;
+  if(!multi){paintRange();return}
   selectDay(s);
   const cell=calEl.querySelector('[data-day="'+endKey+'"]');
   openPop(cell?cell.getBoundingClientRect():calEl.getBoundingClientRect(),{start:s,end:en});
 });
 calEl.addEventListener('click',e=>{
   const band=e.target.closest('[data-ev]');
-  if(band){const ev=events.find(x=>x.id===band.dataset.ev);if(ev)openPop(band.getBoundingClientRect(),{id:ev.id,title:ev.title||'',start:ev.start,end:ev.end||ev.start,type:EVT[ev.type]?ev.type:'other',color:ev.color||'',note:ev.note||'',school:!!ev.school});return}
-  // タッチ操作（mousedown が来ない端末）のとき
-  const c=e.target.closest('[data-day]');if(c&&!qp){selectDay(c.dataset.day);const cell=calEl.querySelector('[data-day="'+c.dataset.day+'"]');openPop((cell||c).getBoundingClientRect(),{start:c.dataset.day,end:c.dataset.day})}
+  if(band&&!copyMode){const ev=events.find(x=>x.id===band.dataset.ev);if(ev)openPop(band.getBoundingClientRect(),evData(ev));return}
+  const c=e.target.closest('[data-day]');if(!c)return;
+  if(copyMode){const k=c.dataset.day;copyMode.days.has(k)?copyMode.days.delete(k):copyMode.days.add(k);renderCal();return}
+  if(!qp)selectDay(c.dataset.day);
+});
+calEl.addEventListener('dblclick',e=>{
+  if(copyMode||e.target.closest('[data-ev]'))return;
+  const c=e.target.closest('[data-day]');if(!c)return;
+  const k=c.dataset.day;selectDay(k);
+  const cell=calEl.querySelector('[data-day="'+k+'"]');
+  openPop((cell||c).getBoundingClientRect(),{start:k,end:k});
 });
 document.getElementById('calAdd').addEventListener('click',e=>openPop(e.currentTarget.getBoundingClientRect(),{start:calSel,end:calSel}));
 document.getElementById('calDay').addEventListener('click',async e=>{
   const b=e.target.closest('button');if(!b)return;const row=b.closest('[data-ev]');if(!row)return;
   const ev=events.find(x=>x.id===row.dataset.ev);if(!ev)return;
-  if(b.dataset.act==='evedit')openPop(row.getBoundingClientRect(),{id:ev.id,title:ev.title||'',start:ev.start,end:ev.end||ev.start,type:EVT[ev.type]?ev.type:'other',color:ev.color||'',note:ev.note||'',school:!!ev.school});
+  if(b.dataset.act==='evedit')openPop(row.getBoundingClientRect(),evData(ev));
+  if(b.dataset.act==='evcopy')startCopy(evData(ev));
   if(b.dataset.act==='evdel'){if(!arm(ev.id,renderCalDay))return;try{await fsDeleteDoc(fsDoc(fbDb,'sotsusei','board','events',ev.id))}catch(err){fail(err)}}
 });
 document.getElementById('calPrev').addEventListener('click',()=>{closePop();calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()-1,1);renderCal()});
@@ -1328,13 +1392,23 @@ const SEED_EVENTS={
   e20261007:{title:'打ち合わせ',start:'2026-10-07',end:'2026-10-07',type:'meeting',color:'',note:''},
   e20261008:{title:'休暇',start:'2026-10-08',end:'2026-10-08',type:'holiday',color:'',note:''}
 };
+// 水・土の集まりを、時刻つきの「打ち合わせ」の予定として 1 日ずつ登録する
+function meetSeed(){
+  const out={};
+  for(let d=D(MEET_FROM);isoK(d)<=MEET_TO;d.setDate(d.getDate()+1)){
+    const k=isoK(d),w=d.getDay();if((w!==3&&w!==6)||MEET_SKIP.includes(k))continue;
+    out['mt'+k.replace(/-/g,'')]={title:'打ち合わせ・作業',start:k,end:k,type:'meeting',color:'',note:w===3?'昼食込み':'昼食・休憩込み',time:'11:30',endTime:w===3?'16:00':'20:00',imp:''};
+  }
+  return out;
+}
 // あとから追加する予定（それぞれ一度だけ。消したものは戻らない）
 const SEED_EVENTS_LATER=[
   ['eventsSeeded2',{e20261027:{title:'Marvelous Designer のイベント',start:'2026-10-27',end:'2026-10-27',type:'other',color:'md',note:''}}],
   ['eventsSeeded3',Object.fromEntries([
-    ...MS0.map(m=>['ms'+m[0].replace(/-/g,''),{title:m[1],start:m[0],end:m[0]==='2027-02-02'?'2027-02-06':m[0],type:'deadline',color:'',note:'',school:m[2]==='s'}]),
+    ...MS0.map(m=>['ms'+m[0].replace(/-/g,''),{title:m[1],start:m[0],end:m[0]==='2027-02-02'?'2027-02-06':m[0],type:'deadline',color:'',note:'',school:m[2]==='s',imp:m[2]==='s'?'high':''}]),
     ...TESTS0.map((t,i)=>['ts'+(i+1),{title:'受け渡しテスト'+t[1]+'：'+({'①':'Maya → MD（素体）','②':'Maya → MD（アニメ）','③':'Maya → Unity（素体で VRM）','④':'MD → ZBrush（厚み付き）','⑤':'MD → Maya（T ポーズ衣装）','⑥':'ZBrush → ChiTuBox → テスト出力'}[t[1]]||''),start:t[0],end:t[0],type:'check',color:'ink',note:'',test:t[1]}])
-  ])]
+  ])],
+  ['eventsSeeded4',meetSeed()]
 ];
 async function seedEventsOnce(){
   try{
@@ -1997,7 +2071,7 @@ function dayChips(key){
   sessionsOn(key).forEach(s=>ch.push('<span class="chip">'+(s.k==='meet'?'<i class="ic" style="--c:var(--accent)">集</i>':'<i class="ic" style="--c:var(--muted)">授</i>')+'<span class="t">'+s.label+' '+s.time+'（約 '+s.h+' 時間）</span></span>'));
   if(!fromEvents())MS0.filter(m=>m[0]===key).forEach(m=>ch.push('<span class="chip"><i class="ic" style="--c:var(--high)">!</i><span class="t">'+m[1]+'</span></span>'));
   if(!fromEvents())TESTS0.filter(t=>t[0]===key).forEach(t=>ch.push('<span class="chip"><i class="ic" style="--c:var(--ink)"></i><span class="t">受け渡しテスト'+t[1]+'</span></span>'));
-  evOn(key).forEach(e=>ch.push('<span class="chip">'+(evIcon(e)?'<i class="ic" style="--c:'+evColor(e)+'">'+evIcon(e)+'</i>':'<i class="ph-mark" style="background:'+evColor(e)+'"></i>')+'<span class="t">'+esc(e.title)+'</span></span>'));
+  evOn(key).filter(e=>!isMeet(e)).forEach(e=>ch.push('<span class="chip">'+(evIcon(e)?'<i class="ic" style="--c:'+evColor(e)+'">'+evIcon(e)+'</i>':'<i class="ph-mark" style="background:'+evColor(e)+'"></i>')+'<span class="t">'+esc(e.title)+'</span></span>'));
   tasks.filter(t=>t.due===key&&t.status!=='done').forEach(t=>ch.push('<span class="chip"><i class="ph-mark" style="background:var(--'+phaseOf(t.phase).c+')"></i><span class="t">期限：'+esc(t.title)+'（'+esc(name(t.owner))+'）</span></span>'));
   return ch;
 }
@@ -2115,7 +2189,7 @@ function renderHomeHero(){
   const ch=sessionsOn(key).map(s=>'<span class="sess">'+(s.k==='meet'?'<i class="ic" style="--c:var(--accent)">集</i>':'<i class="ic" style="--c:var(--muted)">授</i>')+s.label+' '+s.time+'</span>');
   const items=[];
   slots.filter(s=>s.date===key).sort((p,q)=>toMin(p.start)-toMin(q.start)).forEach(s=>items.push('<div class="ti'+(s.done?' done':'')+'"><span class="mono">'+s.start+'–'+s.end+'</span><span>'+esc(s.title)+'</span><span class="muted" style="font-size:12.5px">'+(s.owner==='both'?'二人':esc(name(s.owner)))+'</span></div>'));
-  evOn(key).forEach(e=>items.push('<div class="ti"><span class="mono">予定</span><span>'+esc(e.title)+'</span><span></span></div>'));
+  evOn(key).filter(e=>!isMeet(e)).forEach(e=>items.push('<div class="ti"><span class="mono">予定</span><span>'+esc(e.title)+'</span><span></span></div>'));
   tasks.filter(t=>t.due===key&&t.status!=='done').forEach(t=>items.push('<div class="ti"><span class="mono" style="color:var(--high)">今日まで</span><span>'+esc(t.title)+'</span><span class="muted" style="font-size:12.5px">'+esc(name(t.owner))+'</span></div>'));
   const late=tasks.filter(t=>t.status!=='done'&&t.due&&t.due<key).length;
   document.getElementById('homeToday').innerHTML='<span class="k">今日やること</span><h2>'+(d.getMonth()+1)+'/'+d.getDate()+'（'+wd(key)+'）</h2>'+(ch.length?'<div style="display:flex;flex-wrap:wrap;gap:6px">'+ch.join('')+'</div>':'')+
@@ -2123,13 +2197,13 @@ function renderHomeHero(){
     (late?'<div style="font-size:13px;color:var(--high);font-weight:700">期限を過ぎた未完了のタスクが '+late+' 件あります</div>':'')+
     '<div class="foot"><button class="btn2" type="button" data-goto="day">今日の時間割を開く</button></div>';
   const DL=[...getMS()].sort((a,b)=>a[0]<b[0]?-1:1).filter(m=>m[0]>=key);
-  const nx=DL[0], ns=DL.find(m=>m[2]==='s');
+  const nx=DL[0], ns=DL.find(m=>m[2]==='high');
   if(!nx){document.getElementById('homeNext').innerHTML='<span class="k">一番近い締切</span><p>残っている締切はありません。</p>';return}
   const n=diff(D(nx[0]),today);
   document.getElementById('homeNext').className='hero-card hero-next';
-  document.getElementById('homeNext').innerHTML='<span class="k">一番近い締切</span><h2>'+(nx[2]==='s'?'<span class="tag-s">学校</span>':'')+nx[1]+'</h2><div class="big">'+(n===0?'今日':n+'<small>日</small>')+'</div>'+
+  document.getElementById('homeNext').innerHTML='<span class="k">一番近い締切</span><h2>'+impTag(nx[2])+nx[1]+'</h2><div class="big">'+(n===0?'今日':n+'<small>日</small>')+'</div>'+
     '<div class="muted" style="font-size:13.5px">'+fmt(D(nx[0]))+'（'+wd(nx[0])+'）'+(n>0?' ・ 作業できる時間 約 '+hoursUntil(nx[0])+' 時間':'')+'</div>'+
-    (ns&&ns!==nx?'<div style="font-size:13.5px;border-top:1px dashed var(--line);padding-top:8px">次の学校の節目：<b>'+ns[1]+'</b> '+fmt(D(ns[0]))+' ・ あと '+diff(D(ns[0]),today)+' 日</div>':'');
+    (ns&&ns!==nx?'<div style="font-size:13.5px;border-top:1px dashed var(--line);padding-top:8px">次の最重要の締切：<b>'+ns[1]+'</b> '+fmt(D(ns[0]))+' ・ あと '+diff(D(ns[0]),today)+' 日</div>':'');
 }
 
 function renderAll(){renderHome();renderCal();renderTasks();renderMats();renderPosts();renderDoc();renderDay();renderProgress()}
