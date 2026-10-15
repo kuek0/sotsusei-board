@@ -250,6 +250,26 @@ img{max-width:100%}
 .ev.tst{font-weight:700}
 .ev.done{color:var(--muted);text-decoration:line-through}
 .ev.more{color:var(--muted)}
+.cday.rng{background:color-mix(in srgb,var(--accent) 16%,var(--surface))}
+.cal-head .add-ev{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
+.qpop{position:absolute;z-index:60;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 36px color-mix(in srgb,var(--ink) 24%,transparent);padding:12px;display:grid;gap:10px}
+.qpop #qpTitle{font:inherit;font-size:16px;font-weight:700;border:0;border-bottom:2px solid var(--line);padding:4px 2px;background:transparent;color:var(--ink);width:100%;outline:none}
+.qpop #qpTitle:focus{border-bottom-color:var(--accent)}
+.qp-row{display:flex;gap:6px;align-items:center;font-size:13px}
+.qp-row input{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:4px 6px;font:inherit;font-size:13px;color:var(--ink)}
+.qp-types{display:flex;flex-wrap:wrap;gap:5px}
+.qp-types button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;font-size:12.5px;display:inline-flex;gap:5px;align-items:center;color:var(--ink)}
+.qp-types button[aria-pressed="true"]{border-color:var(--ink);background:var(--soft);font-weight:700}
+.qp-colors{display:flex;gap:7px;align-items:center;font-size:12px}
+.qp-colors .sw{width:20px;height:20px;border-radius:50%;border:0;background:var(--c);padding:0;font-size:9px;color:var(--surface);font-weight:700}
+.qp-colors .sw.auto{background:var(--soft);color:var(--muted);border:1px dashed var(--muted)}
+.qp-colors .sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--ink)}
+.qpop textarea{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:6px 8px;font:inherit;font-size:13px;color:var(--ink);resize:vertical;width:100%}
+.qp-acts{display:flex;gap:8px;align-items:center}
+.qp-acts .sp{flex:1}
+.qp-acts .qp-save{border:0;background:var(--accent);color:var(--surface);border-radius:4px;padding:6px 16px;font-weight:700}
+.qp-acts .qp-del{border:0;background:none;color:var(--muted);font-size:12.5px;padding:4px}
+.qp-acts .qp-del.arm{color:var(--high);font-weight:700}
 .cal-day{display:grid;gap:6px}
 .cal-day h3{margin:0;font-size:15px}
 .cal-day .up-item{grid-template-columns:64px 1fr auto}
@@ -534,26 +554,12 @@ body.present .blk{grid-template-columns:0 minmax(0,1fr)}
 <div class="panel" data-panel="calendar" hidden>
   <section>
     <div class="sec-head"><h2>カレンダー</h2>
-      <div class="cal-head"><button type="button" id="calPrev" aria-label="前の月">‹</button><b id="calTitle"></b><button type="button" id="calNext" aria-label="次の月">›</button><button type="button" id="calToday">今月</button></div>
+      <div class="cal-head"><button type="button" id="calPrev" aria-label="前の月">‹</button><b id="calTitle"></b><button type="button" id="calNext" aria-label="次の月">›</button><button type="button" id="calToday">今月</button><button type="button" id="calAdd" class="add-ev">＋ 予定</button></div>
     </div>
+    <p class="muted" style="margin:0;font-size:12.5px">日付を押すとその日に予定を追加、ドラッグすると複数日にまとめて追加できます。予定を押すと編集・削除できます。</p>
     <div class="cal" id="cal"></div>
     <div class="ev-types" id="evTypes"></div>
     <div class="cal-day" id="calDay"></div>
-    <div class="box" id="workHours"></div>
-    <form class="form" id="evForm" autocomplete="off">
-      <b id="evFormTitle" style="font-size:14px">予定を追加</b>
-      <input id="evTitle" placeholder="予定の名前（例：打ち合わせ、衣装案を考える）" required maxlength="80">
-      <div class="form-row3">
-        <label>開始日<input id="evStart" type="date" required min="2026-01-01" max="2027-12-31"></label>
-        <label>終了日<input id="evEnd" type="date" required min="2026-01-01" max="2027-12-31"></label>
-        <label>種類<select id="evType"></select></label>
-        <label>色<select id="evColor">
-          <option value="">種類に合わせる</option><option value="maya">水色（Maya）</option><option value="md">オレンジ（MD）</option><option value="zb">紫（ZBrush）</option><option value="out">グレー（出力）</option><option value="unity">ピンク（Unity）</option>
-        </select></label>
-      </div>
-      <textarea id="evNote" placeholder="メモ（任意）" maxlength="500"></textarea>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="submit" id="evSubmit">追加</button><button type="button" class="btn2" id="evCancel" hidden>編集をやめる</button></div>
-    </form>
   </section>
 </div>
 
@@ -582,6 +588,7 @@ body.present .blk{grid-template-columns:0 minmax(0,1fr)}
   <div class="sec-head"><h2>授業日</h2><span class="muted mono" style="font-size:13px">木 4.5時間（3〜5限）× 14日 ＋ 金 9時間（1〜6限）× 14日 ＝ 授業 189 時間</span></div>
   <div class="classes" id="classes"></div>
   <details class="note"><summary>授業日の前提</summary>金曜 14 回は指定どおり。木曜は「金曜の前日」と仮定して並べています（10/8・12/10 は金曜が休みのため除外）。実際の木曜日程が違う場合は教えてください。12/19〜1/7 は授業がない期間として、学校のプリンタでの本出力と VRM のウェイト・フェイシャルに充てています。</details>
+<div class="box" id="workHours"></div>
 </section>
 </div>
 
@@ -1089,7 +1096,6 @@ const EVT={
   holiday:{label:'休み',ic:'休',c:'muted'},
   other:{label:'その他',ic:'',c:'gen'}
 };
-document.getElementById('evType').innerHTML=Object.entries(EVT).map(([k,v])=>'<option value="'+k+'">'+v.label+'</option>').join('');
 document.getElementById('evTypes').innerHTML=Object.entries(EVT).map(([k,v])=>'<span>'+(v.ic?'<i class="ic" style="--c:var(--'+v.c+')">'+v.ic+'</i>':'<i class="band'+(k==='holiday'?' holiday':'')+'" style="--c:var(--'+v.c+');width:22px;height:10px;margin:0"></i>')+v.label+'</span>').join('')+'<span><i class="ic" style="--c:var(--high)">!</i>工程の節目</span><span><i class="ic" style="--c:var(--ink)"></i>受け渡しテスト</span><span><i class="ic" style="--c:var(--maya)"></i>タスクの期限（工程の色）</span><span><i style="display:inline-block;width:16px;height:11px;border-radius:2px;background:color-mix(in srgb,var(--high) 12%,var(--surface));border:1px solid var(--high)"></i>学校の提出・報告の日</span>';
 const evColor=e=>'var(--'+(e.color||(EVT[e.type]||EVT.other).c)+')';
 const evIcon=e=>(EVT[e.type]||EVT.other).ic;
@@ -1152,69 +1158,113 @@ function renderCal(){
     h+='</div>';
   }
   document.getElementById('cal').innerHTML=h;
-  renderCalDay();
+  renderCalDay();paintRange();
 }
 function renderCalDay(){
   const sd=D(calSel), evs=evOn(calSel), items=dayItems(calSel);
   let h='<h3>'+(sd.getMonth()+1)+'/'+sd.getDate()+'（'+'日月火水木金土'[sd.getDay()]+'）の予定</h3>';
   h+=evs.map(e=>'<div class="up-item" data-ev="'+esc(e.id)+'"><span class="mono" style="font-size:12px">'+fmt(D(e.start))+(e.end&&e.end!==e.start?'–'+fmt(D(e.end)):'')+'</span><span>'+(evIcon(e)?'<i class="ic" style="--c:'+evColor(e)+';margin-right:5px">'+evIcon(e)+'</i>':'<i class="ph-mark" style="background:'+evColor(e)+';margin-right:6px"></i>')+esc(e.title)+(e.note?'<br><span class="muted" style="font-size:12.5px">'+esc(e.note)+'</span>':'')+'</span><span class="acts"><button type="button" data-act="evedit">編集</button><button type="button" data-act="evdel" class="'+(armed===e.id?'arm':'')+'">'+(armed===e.id?'本当に削除':'削除')+'</button></span></div>').join('');
   h+=items.map(x=>'<div class="up-item"><span class="mono">'+(x.k==='task'?'<span class="ph-mark" style="background:var(--'+x.c+')"></span>':'')+'</span><span'+(x.done?' style="text-decoration:line-through;color:var(--muted)"':'')+'>'+esc(x.t)+'</span><span class="muted" style="font-size:12.5px">'+(x.k==='task'?esc(name(x.owner))+' ・ '+LABEL[x.status]:x.k==='ms'?'工程の節目':x.k==='tst'?'受け渡しテスト':'約 '+x.h+' 時間（'+x.note+'）')+'</span></div>').join('');
-  if(!evs.length&&!items.length)h+='<div class="empty">予定はありません。下のフォームから追加できます。</div>';
+  if(!evs.length&&!items.length)h+='<div class="empty">予定はありません。カレンダーの日付を押すと追加できます。</div>';
   document.getElementById('calDay').innerHTML=h;
 }
-function resetEvForm(){
-  editingEv=null;
-  document.getElementById('evFormTitle').textContent='予定を追加';
-  document.getElementById('evSubmit').textContent='追加';
-  document.getElementById('evCancel').hidden=true;
-  ['evTitle','evNote'].forEach(i=>document.getElementById(i).value='');
-  document.getElementById('evType').value='meeting';document.getElementById('evColor').value='';
-  document.getElementById('evStart').value=calSel;document.getElementById('evEnd').value=calSel;
+/* 予定の追加・編集：TimeTree のように、押したところに小さな入力画面を開く */
+const pop=document.createElement('div');pop.className='qpop';pop.hidden=true;pop.setAttribute('role','dialog');pop.setAttribute('aria-label','予定');
+document.body.appendChild(pop);
+const QP_COLORS=['','maya','md','zb','unity','out','high'];
+let qp=null, qpArm=false;
+function selectDay(key){calSel=key;renderCal()}
+function paintRange(){
+  document.querySelectorAll('#cal .cday.rng').forEach(c=>c.classList.remove('rng'));
+  const r=qp&&!qp.id?[qp.start,qp.end]:drag?[drag.a<drag.b?drag.a:drag.b,drag.a<drag.b?drag.b:drag.a]:null;
+  if(r)document.querySelectorAll('#cal .cday').forEach(c=>{const k=c.dataset.day;if(k>=r[0]&&k<=r[1])c.classList.add('rng')});
 }
-function selectDay(key){
-  calSel=key;
-  if(!editingEv){document.getElementById('evStart').value=key;document.getElementById('evEnd').value=key}
-  renderCal();
+function closePop(){if(!qp)return;qp=null;pop.hidden=true;paintRange()}
+function drawPop(){
+  const isEdit=!!qp.id;
+  pop.innerHTML='<input id="qpTitle" placeholder="予定を入力" maxlength="80" value="'+esc(qp.title)+'">'+
+    '<div class="qp-row"><input type="date" id="qpStart" value="'+qp.start+'" aria-label="開始日"><span>〜</span><input type="date" id="qpEnd" value="'+qp.end+'" aria-label="終了日"></div>'+
+    '<div class="qp-types">'+Object.entries(EVT).map(([k,v])=>'<button type="button" data-type="'+k+'" aria-pressed="'+(qp.type===k)+'"><i class="ic" style="--c:var(--'+v.c+')"></i>'+v.label+'</button>').join('')+'</div>'+
+    '<div class="qp-colors"><span class="muted">色</span>'+QP_COLORS.map(c=>'<button type="button" class="sw'+(c?'':' auto')+'" data-color="'+c+'" aria-pressed="'+((qp.color||'')===c)+'" title="'+(c?c:'種類に合わせる')+'" style="--c:var(--'+(c||(EVT[qp.type]||EVT.other).c)+')">'+(c?'':'自')+'</button>').join('')+'</div>'+
+    '<textarea id="qpNote" rows="2" placeholder="メモ（任意）" maxlength="500">'+esc(qp.note)+'</textarea>'+
+    '<div class="qp-acts">'+(isEdit?'<button type="button" class="qp-del'+(qpArm?' arm':'')+'">'+(qpArm?'本当に削除':'削除')+'</button>':'')+'<span class="sp"></span><button type="button" class="btn2 qp-cancel">閉じる</button><button type="button" class="qp-save">'+(isEdit?'保存':'追加')+'</button></div>';
 }
-document.getElementById('cal').addEventListener('click',e=>{
-  const band=e.target.closest('[data-ev]');
-  if(band){const ev=events.find(x=>x.id===band.dataset.ev);if(ev){calSel=ev.start>=iso(new Date(calMonth.getFullYear(),calMonth.getMonth(),1))?ev.start:calSel;selectDay(calSel);document.getElementById('calDay').scrollIntoView({behavior:'smooth',block:'nearest'})}return}
-  const b=e.target.closest('[data-day]');if(b)selectDay(b.dataset.day);
+function openPop(rect,data){
+  qp=Object.assign({id:null,title:'',type:'meeting',color:'',note:''},data);qpArm=false;
+  drawPop();pop.hidden=false;
+  const w=Math.min(320,window.innerWidth-24), x=Math.max(12,Math.min(rect.left+window.scrollX,window.scrollX+window.innerWidth-w-12));
+  let y=rect.bottom+window.scrollY+6;
+  pop.style.width=w+'px';pop.style.left=x+'px';pop.style.top=y+'px';
+  const ph=pop.offsetHeight;if(rect.bottom+6+ph>window.innerHeight&&rect.top-ph-6>0)pop.style.top=(rect.top+window.scrollY-ph-6)+'px';
+  paintRange();
+  const t=document.getElementById('qpTitle');t.focus();t.select();
+}
+function readPop(){
+  qp.title=document.getElementById('qpTitle').value;qp.note=document.getElementById('qpNote').value;
+  qp.start=document.getElementById('qpStart').value||qp.start;qp.end=document.getElementById('qpEnd').value||qp.start;
+  if(qp.end<qp.start)[qp.start,qp.end]=[qp.end,qp.start];
+}
+async function savePop(){
+  readPop();const title=qp.title.trim();
+  if(!title){const t=document.getElementById('qpTitle');t.focus();t.placeholder='予定の名前を入れてください';return}
+  const data={title,start:qp.start,end:qp.end,type:qp.type,color:qp.color||'',note:qp.note.trim(),by:who(),updatedAt:Date.now()};
+  const id=qp.id;closePop();
+  try{
+    if(id)await fsUpdateDoc(fsDoc(fbDb,'sotsusei','board','events',id),data);
+    else await fsAddDoc(eventsCol,Object.assign(data,{createdAt:Date.now()}));
+  }catch(err){fail(err,'予定を保存できませんでした。')}
+}
+pop.addEventListener('click',async e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.type){readPop();qp.type=b.dataset.type;drawPop();return}
+  if(b.dataset.color!==undefined){readPop();qp.color=b.dataset.color;drawPop();return}
+  if(b.classList.contains('qp-cancel'))return closePop();
+  if(b.classList.contains('qp-save'))return savePop();
+  if(b.classList.contains('qp-del')){
+    if(!qpArm){readPop();qpArm=true;drawPop();return}
+    const id=qp.id;closePop();try{await fsDeleteDoc(fsDoc(fbDb,'sotsusei','board','events',id))}catch(err){fail(err)}
+  }
 });
+pop.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();closePop();return}
+  if(e.key==='Enter'&&e.target.id==='qpTitle'&&!e.isComposing&&e.keyCode!==229){e.preventDefault();savePop()}
+});
+pop.addEventListener('change',e=>{if(e.target.id==='qpStart'||e.target.id==='qpEnd'){readPop();if(!qp.id)paintRange()}});
+document.addEventListener('mousedown',e=>{if(qp&&!pop.contains(e.target)&&!e.target.closest('#cal [data-day],#cal [data-ev],#calDay [data-ev],#calAdd'))closePop()});
+
+// 日付を押す → その日に追加。ドラッグ → 複数日にまとめて追加
+let drag=null;
+const calEl=document.getElementById('cal');
+calEl.addEventListener('mousedown',e=>{
+  if(e.button!==0||e.target.closest('[data-ev]'))return;
+  const c=e.target.closest('[data-day]');if(!c)return;
+  e.preventDefault();drag={a:c.dataset.day,b:c.dataset.day};closePop();paintRange();
+});
+calEl.addEventListener('mouseover',e=>{if(!drag)return;const c=e.target.closest('[data-day]');if(c&&c.dataset.day!==drag.b){drag.b=c.dataset.day;paintRange()}});
+document.addEventListener('mouseup',e=>{
+  if(!drag)return;
+  const s=drag.a<drag.b?drag.a:drag.b, en=drag.a<drag.b?drag.b:drag.a, endKey=drag.b;drag=null;
+  selectDay(s);
+  const cell=calEl.querySelector('[data-day="'+endKey+'"]');
+  openPop(cell?cell.getBoundingClientRect():calEl.getBoundingClientRect(),{start:s,end:en});
+});
+calEl.addEventListener('click',e=>{
+  const band=e.target.closest('[data-ev]');
+  if(band){const ev=events.find(x=>x.id===band.dataset.ev);if(ev)openPop(band.getBoundingClientRect(),{id:ev.id,title:ev.title||'',start:ev.start,end:ev.end||ev.start,type:EVT[ev.type]?ev.type:'other',color:ev.color||'',note:ev.note||''});return}
+  // タッチ操作（mousedown が来ない端末）のとき
+  const c=e.target.closest('[data-day]');if(c&&!qp){selectDay(c.dataset.day);const cell=calEl.querySelector('[data-day="'+c.dataset.day+'"]');openPop((cell||c).getBoundingClientRect(),{start:c.dataset.day,end:c.dataset.day})}
+});
+document.getElementById('calAdd').addEventListener('click',e=>openPop(e.currentTarget.getBoundingClientRect(),{start:calSel,end:calSel}));
 document.getElementById('calDay').addEventListener('click',async e=>{
   const b=e.target.closest('button');if(!b)return;const row=b.closest('[data-ev]');if(!row)return;
   const ev=events.find(x=>x.id===row.dataset.ev);if(!ev)return;
-  if(b.dataset.act==='evedit'){
-    editingEv=ev.id;
-    document.getElementById('evFormTitle').textContent='予定を編集';
-    document.getElementById('evSubmit').textContent='保存';
-    document.getElementById('evCancel').hidden=false;
-    document.getElementById('evTitle').value=ev.title||'';document.getElementById('evNote').value=ev.note||'';
-    document.getElementById('evStart').value=ev.start;document.getElementById('evEnd').value=ev.end||ev.start;
-    document.getElementById('evType').value=EVT[ev.type]?ev.type:'other';document.getElementById('evColor').value=ev.color||'';
-    document.getElementById('evForm').scrollIntoView({behavior:'smooth',block:'nearest'});
-  }
-  if(b.dataset.act==='evdel'){if(!arm(ev.id,renderCalDay))return;try{await fsDeleteDoc(fsDoc(fbDb,'sotsusei','board','events',ev.id));if(editingEv===ev.id)resetEvForm()}catch(err){fail(err)}}
+  if(b.dataset.act==='evedit')openPop(row.getBoundingClientRect(),{id:ev.id,title:ev.title||'',start:ev.start,end:ev.end||ev.start,type:EVT[ev.type]?ev.type:'other',color:ev.color||'',note:ev.note||''});
+  if(b.dataset.act==='evdel'){if(!arm(ev.id,renderCalDay))return;try{await fsDeleteDoc(fsDoc(fbDb,'sotsusei','board','events',ev.id))}catch(err){fail(err)}}
 });
-document.getElementById('evCancel').addEventListener('click',resetEvForm);
-document.getElementById('evStart').addEventListener('change',e=>{const en=document.getElementById('evEnd');if(!en.value||en.value<e.target.value)en.value=e.target.value});
-document.getElementById('evForm').addEventListener('submit',async e=>{
-  e.preventDefault();
-  const s=document.getElementById('evStart').value, en=document.getElementById('evEnd').value||s;
-  if(en<s){const el=document.getElementById('evEnd');el.setCustomValidity('終了日は開始日以降にしてください');el.reportValidity();return}
-  const data={title:document.getElementById('evTitle').value.trim(),start:s,end:en,type:document.getElementById('evType').value,color:document.getElementById('evColor').value,note:document.getElementById('evNote').value.trim(),by:who(),updatedAt:Date.now()};
-  try{
-    if(editingEv)await fsUpdateDoc(fsDoc(fbDb,'sotsusei','board','events',editingEv),data);
-    else await fsAddDoc(eventsCol,Object.assign(data,{createdAt:Date.now()}));
-    resetEvForm();
-  }catch(err){fail(err,'予定を保存できませんでした。')}
-});
-document.getElementById('evEnd').addEventListener('input',e=>e.target.setCustomValidity(''));
-document.getElementById('calPrev').addEventListener('click',()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()-1,1);renderCal()});
-document.getElementById('calNext').addEventListener('click',()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+1,1);renderCal()});
-document.getElementById('calToday').addEventListener('click',()=>{calMonth=new Date(today.getFullYear(),today.getMonth(),1);selectDay(iso(today))});
+document.getElementById('calPrev').addEventListener('click',()=>{closePop();calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()-1,1);renderCal()});
+document.getElementById('calNext').addEventListener('click',()=>{closePop();calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+1,1);renderCal()});
+document.getElementById('calToday').addEventListener('click',()=>{closePop();calMonth=new Date(today.getFullYear(),today.getMonth(),1);selectDay(iso(today))});
 window.matchMedia('(max-width:720px)').addEventListener('change',()=>renderCal());
-resetEvForm();
 
 // 最初に登録しておく予定（一度だけ。消したものは戻らない）
 const SEED_EVENTS={
