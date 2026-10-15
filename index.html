@@ -570,7 +570,7 @@ img{max-width:100%}
   <div class="eyebrow">完成目標</div>
   <div class="exhibit">
     <div class="ex"><span class="k">フィギュア</span><h4>固定された造形でも、リアリティのある布表現</h4><p>MD で作った布のシミュレーションを生かし、止まった立体でも本物の布らしく見える衣装を一番の見せ場にする。</p></div>
-    <div class="ex"><span class="k">VRM</span><h4>テクスチャで質感を高いレベルで表現</h4><p>3D ディスプレイで近くから見ても、布・肌・髪・装飾の素材の違いが分かる。ZBrush のディテールをノーマルマップで生かす。</p></div>
+    <div class="ex"><span class="k">VRM</span><h4>テクスチャで質感を高いレベルで表現</h4><p>3D ディスプレイで近くから見ても、布・肌・髪・装飾の素材の違いが分かる。ZBrush のディテールをノーマルマップで生かす。トゥーン調かリアル寄りかは 11/13 に決める。</p></div>
     <div class="ex"><span class="k">展示</span><h4>Unity で動かし、3D ディスプレイで見せる</h4><p>立体・モニター・3D ディスプレイの 3 つで展示する。</p></div>
   </div>
   <div class="eyebrow">学校の提出・報告</div>
@@ -586,6 +586,7 @@ img{max-width:100%}
     <div class="dec"><span class="tag">キャラ</span><div><h4>オリジナルキャラクター（デザイン画あり）</h4><p>服なしのデザインは確定。衣装は各自で案を考えて 10/16 に共有し、10/23 にすり合わせて確定する。</p></div></div>
     <div class="dec"><span class="tag">進め方</span><div><h4>途中経過はチャット（LINE 含む）で随時共有</h4><p>案は適宜更新して連絡し合う。早く決まれば 10/23 を待たずに前倒しで次の工程へ進む。</p></div></div>
     <div class="dec"><span class="tag">VRM</span><div><h4>VRM の制作は確定</h4><p>動きは配布アニメーション、表情設定とカメラはプラグインを使う。</p></div></div>
+    <div class="dec"><span class="tag">質感</span><div><h4>今はトゥーン調の予定。リアル寄りになる可能性もある</h4><p>神がモチーフなので、リアル寄りも候補に残す。11/13 の質感テストで両方を試し、3D ディスプレイで見比べて決める。ソフトは Substance 3D Painter と Photoshop の予定。新しいペイントツールに良いものがあれば変更も検討する。</p></div></div>
     <div class="dec"><span class="tag">立体</span><div><h4>小さく、塗装なし、小物なし</h4><p>作り込みは ZBrush。分割はひとまず造形してから先生と相談する。</p></div></div>
     <div class="dec"><span class="tag">出力</span><div><h4>学校のプリンタ（ChiTuBox）</h4><p>使い方は先生に教わる。冬休み中も使用できる。</p></div></div>
     <div class="dec"><span class="tag">ポーズ</span><div><h4>大きなポーズは 11/6 に確定</h4><p>体・手足の向きはここで固定。指先・表情などは ZBrush で後から調整できる。</p></div></div>
@@ -1047,17 +1048,32 @@ const PLAN_V2={
     n10:{title:'講評を受けて最終調整',phase:'ph6',owner:'both',due:'2027-02-01',note:''}
   }
 };
+// 10/15 追記：質感の方針は 11/13 の質感テストで比較して決める
+const PLAN_V3={
+  due:{n06:'2026-10-23',n07:'2026-11-13'},
+  patch:{n06:{title:'完成目標（見せ場）を決める'},n07:{note:'トゥーン調とリアル寄りの両方を試し、3D ディスプレイで見比べる'}},
+  add:{
+    n11:{title:'質感の方針（トゥーン調 / リアル寄り）とテクスチャのソフトを決める',phase:'ph7',owner:'both',due:'2026-11-13',note:'現状はトゥーン調・Substance 3D Painter＋Photoshop の予定。新しいペイントツールも候補'},
+    n12:{title:'新しいペイントツールを試す（候補があれば）',phase:'ph7',owner:'b',due:'2026-11-06',note:'Substance 3D Painter と比べて、ノーマルマップの焼き付け・VRM / Unity への書き出しができるか'}
+  }
+};
+// 計画の見直しを、それぞれ一度だけタスクに反映する
 let planChecked=false;
 async function migratePlanV2(){
   if(planChecked||!tasks.length)return;planChecked=true;
   try{
-    const snap=await fsGetDoc(boardRef);
-    if(snap.exists()&&snap.data().planV2)return;
-    const ids=new Set(tasks.map(t=>t.id)), now=Date.now(), batch=fsWriteBatch(fbDb);
-    Object.entries(PLAN_V2.due).forEach(([id,due])=>{if(ids.has(id))batch.update(taskRef(id),Object.assign({due,updatedBy:who(),updatedAt:now},PLAN_V2.patch[id]||{}))});
-    Object.entries(PLAN_V2.add).forEach(([id,t],i)=>{if(!ids.has(id))batch.set(taskRef(id),Object.assign({status:'todo',subs:[],order:90+i,updatedBy:who(),updatedAt:now},t))});
-    batch.set(boardRef,{planV2:true},{merge:true});
-    await batch.commit();
+    const snap=await fsGetDoc(boardRef), flags=snap.exists()?snap.data():{};
+    const ids=new Set(tasks.map(t=>t.id)), had=new Set(ids), now=Date.now(), batch=fsWriteBatch(fbDb);
+    // 同じバッチ内で同じタスクに二度書かないよう、未反映の V2 追加分には V3 の変更を先に混ぜておく
+    if(!flags.planV2)Object.keys(PLAN_V3.patch).forEach(id=>{if(PLAN_V2.add[id])Object.assign(PLAN_V2.add[id],PLAN_V3.patch[id],{due:PLAN_V3.due[id]||PLAN_V2.add[id].due})});
+    let n=0;const done={};
+    [['planV2',PLAN_V2],['planV3',PLAN_V3]].forEach(([flag,P])=>{
+      if(flags[flag])return;
+      Object.entries(P.due).forEach(([id,due])=>{if(had.has(id)){batch.update(taskRef(id),Object.assign({due,updatedBy:who(),updatedAt:now},P.patch[id]||{}));n++}});
+      Object.entries(P.add).forEach(([id,t],i)=>{if(!ids.has(id)){batch.set(taskRef(id),Object.assign({status:'todo',subs:[],order:90+i,updatedBy:who(),updatedAt:now},t));ids.add(id);n++}});
+      done[flag]=true;n++;
+    });
+    if(n){batch.set(boardRef,done,{merge:true});await batch.commit()}
   }catch(err){console.error(err)}
 }
 
