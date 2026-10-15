@@ -263,7 +263,9 @@ img{max-width:100%}
 .qp-types button[aria-pressed="true"]{border-color:var(--ink);background:var(--soft);font-weight:700}
 .qp-colors{display:flex;gap:7px;align-items:center;font-size:12px}
 .qp-colors .sw{width:20px;height:20px;border-radius:50%;border:0;background:var(--c);padding:0;font-size:9px;color:var(--surface);font-weight:700}
-.qp-colors .sw.auto{background:var(--soft);color:var(--muted);border:1px dashed var(--muted)}
+.qp-colors .sw.auto{width:auto;padding:0 6px;border-radius:10px;background:var(--soft);color:var(--muted);border:1px dashed var(--muted);font-size:10.5px}
+.qp-colors .sw.custom{position:relative;display:inline-block;background:var(--c);cursor:pointer;overflow:hidden}
+.qp-colors .sw.custom input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;padding:0;border:0}
 .qp-colors .sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--ink)}
 .qpop textarea{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:6px 8px;font:inherit;font-size:13px;color:var(--ink);resize:vertical;width:100%}
 .qp-sch{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--high);font-weight:700}.qp-sch input{width:15px;height:15px;margin:0;accent-color:var(--high)}
@@ -1222,7 +1224,7 @@ const IMP={'':'通常',mid:'重要',high:'最重要'};
 const impOf=e=>e.imp||(e.school?'high':'');
 document.getElementById('evTypes').innerHTML=Object.entries(EVT).map(([k,v])=>'<span>'+(v.ic?'<i class="ic" style="--c:var(--'+v.c+')"></i>':'<i class="band'+(k==='holiday'?' holiday':'')+'" style="--c:var(--'+v.c+');width:22px;height:10px;margin:0"></i>')+v.label+'</span>').join('')+
   '<span><i class="ic" style="--c:var(--muted)"></i>授業</span><span><i class="ic" style="--c:var(--maya)"></i>タスクの期限（工程の色）</span><span><b>太字</b>＝重要</span><span><b class="imp-sample">赤枠</b>＝最重要</span>';
-const evColor=e=>'var(--'+(e.color||(EVT[e.type]||EVT.other).c)+')';
+const evColor=e=>e.color&&e.color[0]==='#'?e.color:'var(--'+(e.color||(EVT[e.type]||EVT.other).c)+')';
 const evIcon=e=>(EVT[e.type]||EVT.other).ic;
 const evTime=e=>e.time?e.time+(e.endTime?'–'+e.endTime:'〜'):'';
 const isMeet=e=>!!boardFlags.eventsSeeded4&&e.type==='meeting'&&!!e.time&&!!e.endTime;
@@ -1334,7 +1336,9 @@ function drawPop(){
     '<div class="qp-row"><input type="time" id="qpTime" value="'+(qp.time||'')+'" step="300" aria-label="開始時刻"><span>〜</span><input type="time" id="qpEndTime" value="'+(qp.endTime||'')+'" step="300" aria-label="終了時刻"><span class="muted" style="font-size:11.5px;white-space:nowrap">時刻は任意</span></div>'+
     '<div class="qp-types">'+Object.entries(EVT).map(([k,v])=>'<button type="button" data-type="'+k+'" aria-pressed="'+(qp.type===k)+'"><i class="ic" style="--c:var(--'+v.c+')"></i>'+v.label+'</button>').join('')+'</div>'+
     '<div class="qp-types qp-imp"><span class="muted" style="font-size:12px;align-self:center">重要度</span>'+Object.entries(IMP).map(([k,v])=>'<button type="button" data-imp="'+k+'" aria-pressed="'+((qp.imp||'')===k)+'">'+v+'</button>').join('')+'</div>'+
-    '<div class="qp-colors"><span class="muted">色</span>'+QP_COLORS.map(c=>'<button type="button" class="sw'+(c?'':' auto')+'" data-color="'+c+'" aria-pressed="'+((qp.color||'')===c)+'" title="'+(c?c:'種類に合わせる')+'" style="--c:var(--'+(c||(EVT[qp.type]||EVT.other).c)+')">'+(c?'':'自')+'</button>').join('')+'</div>'+
+    '<div class="qp-colors"><span class="muted">色</span>'+QP_COLORS.map(c=>'<button type="button" class="sw'+(c?'':' auto')+'" data-color="'+c+'" aria-pressed="'+((qp.color||'')===c)+'" title="'+(c?c:'種類に合わせる')+'" style="--c:var(--'+(c||(EVT[qp.type]||EVT.other).c)+')">'+(c?'':'自動')+'</button>').join('')+
+      // 好きな色：押すと色を選ぶ画面が開く
+      '<label class="sw custom" title="好きな色を選ぶ" aria-pressed="'+(!!qp.color&&qp.color[0]==='#')+'" style="--c:'+(qp.color&&qp.color[0]==='#'?qp.color:'conic-gradient(#e44,#ec4,#4c6,#4ae,#a6e,#e44)')+'"><input type="color" id="qpCustom" value="'+(qp.color&&qp.color[0]==='#'?qp.color:'#3a8fd6')+'" aria-label="好きな色を選ぶ"></label></div>'+
     '<textarea id="qpNote" rows="2" placeholder="メモ（任意）" maxlength="500">'+esc(qp.note)+'</textarea>'+
     (isEdit?(qp.series?'<label class="qp-scope"><input type="checkbox" id="qpScope"'+(qp.scope?' checked':'')+'> この日以降の繰り返しもまとめて変更・削除</label>':''):
       '<div class="qp-rep"><div class="qp-row"><span class="muted" style="font-size:12px;white-space:nowrap">繰り返し</span><select id="qpFreq">'+[['none','しない'],['weekly','毎週'],['biweekly','2 週ごと'],['daily','毎日']].map(([k,v])=>'<option value="'+k+'"'+(qp.rep.freq===k?' selected':'')+'>'+v+'</option>').join('')+'</select>'+
@@ -1488,6 +1492,7 @@ pop.addEventListener('keydown',e=>{
 pop.addEventListener('change',e=>{
   if(e.target.id==='qpStart'||e.target.id==='qpEnd'){readPop();if(!qp.id)paintRange()}
   if(['qpFreq','qpUntil','qpScope','qpStart'].includes(e.target.id)){readPop();drawPop()}
+  if(e.target.id==='qpCustom'){readPop();qp.color=e.target.value;drawPop()}
 });
 document.addEventListener('mousedown',e=>{if(qp&&!pop.contains(e.target)&&!e.target.closest('#cal [data-ev],#calDay [data-ev],#calAdd'))closePop()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(copyMode||delMode)){copyMode=null;delMode=null;renderCal()}});
