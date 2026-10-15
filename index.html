@@ -285,6 +285,20 @@ img{max-width:100%}
 .delbar{border-color:var(--high)}
 .delbar .del-go{background:var(--high)}
 .delbar .del-go.arm{box-shadow:0 0 0 3px color-mix(in srgb,var(--high) 30%,transparent)}
+.ev.tsum{pointer-events:auto;cursor:pointer;gap:2px;border-radius:3px;padding:0 2px;margin-left:-2px}
+.ev.tsum:hover,.ev.tsum:focus-visible{background:var(--soft)}
+.ev.tsum .dot{width:6px;height:6px;border-radius:50%;background:var(--c);flex:none}
+.ev.tsum .t{margin-left:3px}
+.ev.tsum.done .t{color:var(--muted);text-decoration:line-through}
+.tip{position:absolute;z-index:70;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 28px color-mix(in srgb,var(--ink) 20%,transparent);padding:6px;display:grid;gap:2px}
+.tip-h{font-size:11.5px;font-weight:700;color:var(--muted);padding:4px 6px}
+.tip-f{font-size:11px;color:var(--muted);padding:4px 6px 2px;border-top:1px dashed var(--line);margin-top:2px}
+.tip .tr{display:grid;grid-template-columns:8px 1fr;gap:8px;align-items:baseline;border:0;background:none;text-align:left;padding:5px 6px;border-radius:4px;font-size:13px;color:var(--ink)}
+.tip .tr:hover{background:var(--soft)}
+.tip .tr .dot{width:8px;height:8px;border-radius:50%;background:var(--c);display:inline-block}
+.tip .tr small{display:block;font-size:11.5px;color:var(--muted)}
+.tip .tr.done span{color:var(--muted);text-decoration:line-through}
+.task.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 45%,transparent);transition:box-shadow .3s}
 .qp-acts{display:flex;gap:8px;align-items:center}
 .qp-acts .sp{flex:1}
 .qp-acts .qp-save{border:0;background:var(--accent);color:var(--surface);border-radius:4px;padding:6px 16px;font-weight:700}
@@ -1242,9 +1256,13 @@ function renderCal(){
       const e=p.e,ic=evIcon(e),imp=impOf(e);
       h+='<button type="button" class="band'+(e.type==='holiday'?' holiday':'')+(p.cl?' cl':'')+(p.cr?' cr':'')+(imp?' imp-'+imp:'')+(delMode&&delMode.ids.has(e.id)?' picked':'')+'" data-ev="'+esc(e.id)+'" style="grid-row:'+(p.L+2)+';grid-column:'+(p.s+1)+' / '+(p.en+2)+';--c:'+evColor(e)+'" title="'+esc((evTime(e)?evTime(e)+' ':'')+e.title)+'">'+(ic&&!p.cl?'<i class="ic"></i>':'')+'<span class="t">'+bandLabel(e)+'</span></button>'});
     keys.forEach((key,i)=>{
-      const it=dayItems(key,false);const shown=it.slice(0,maxItems);
-      if(!it.length)return;
-      h+='<div class="dits" style="grid-row:'+(nL+2)+';grid-column:'+(i+1)+'">'+shown.map(x=>
+      // タスクの期限は「タスク ○件」にまとめ、カーソルを合わせたときだけ中身を出す
+      const all=dayItems(key,false), tk=all.filter(x=>x.k==='task'), it=all.filter(x=>x.k!=='task');const shown=it.slice(0,maxItems);
+      if(!all.length)return;
+      const left=tk.filter(x=>!x.done).length;
+      h+='<div class="dits" style="grid-row:'+(nL+2)+';grid-column:'+(i+1)+'">'+
+        (tk.length?'<span class="ev tsum'+(left?'':' done')+'" data-tsum="'+key+'" tabindex="0">'+tk.slice(0,5).map(x=>'<i class="dot" style="--c:var(--'+x.c+')"></i>').join('')+'<span class="t">タスク '+tk.length+(left&&left<tk.length?'（残り '+left+'）':'')+'</span></span>':'')+
+        shown.map(x=>
         '<span class="ev '+(x.k==='task'?'':x.k)+(x.done?' done':'')+'"'+(x.k==='task'?' style="--c:var(--'+x.c+')"':'')+'>'+
         (x.k==='task'?'<i class="dot"></i>':x.k==='ms'?'<i class="ic" style="--c:var(--high)"></i>':x.k==='meet'?'<i class="ic" style="--c:var(--accent)"></i>':x.k==='tst'?'<i class="ic" style="--c:var(--ink)"></i>':'')+'<span class="t">'+esc(x.t)+'</span></span>').join('')+
         (it.length>maxItems?'<span class="ev more">ほか '+(it.length-maxItems)+' 件</span>':'')+'</div>';
@@ -1466,6 +1484,7 @@ document.addEventListener('mouseup',()=>{
   openPop(cell?cell.getBoundingClientRect():calEl.getBoundingClientRect(),{start:s,end:en});
 });
 calEl.addEventListener('click',e=>{
+  const ts=e.target.closest('[data-tsum]');if(ts){showTip(ts);return}
   const band=e.target.closest('[data-ev]');
   if(band&&delMode){const id=band.dataset.ev;delMode.ids.has(id)?delMode.ids.delete(id):delMode.ids.add(id);delMode.last=id;delMode.arm=false;renderCal();return}
   if(band&&!copyMode){const ev=events.find(x=>x.id===band.dataset.ev);if(ev)openPop(band.getBoundingClientRect(),evData(ev));return}
@@ -1479,6 +1498,36 @@ calEl.addEventListener('dblclick',e=>{
   const k=c.dataset.day;selectDay(k);
   const cell=calEl.querySelector('[data-day="'+k+'"]');
   openPop((cell||c).getBoundingClientRect(),{start:k,end:k});
+});
+// タスクのまとめ表示：カーソルを合わせる（スマホは押す）と、その日のタスクを一覧で出す
+const tip=document.createElement('div');tip.className='tip';tip.hidden=true;document.body.appendChild(tip);
+let tipKey=null, tipTimer=null;
+function showTip(el){
+  const key=el.dataset.tsum;clearTimeout(tipTimer);
+  if(tipKey===key&&!tip.hidden)return;tipKey=key;
+  const list=tasks.filter(t=>t.due===key).sort((a,b)=>(a.order||0)-(b.order||0)), d=D(key);
+  tip.innerHTML='<div class="tip-h">'+(d.getMonth()+1)+'/'+d.getDate()+' が期限のタスク</div>'+list.map(t=>'<button type="button" class="tr'+(t.status==='done'?' done':'')+'" data-task="'+esc(t.id)+'"><i class="dot" style="--c:var(--'+phaseOf(t.phase).c+')"></i><span>'+esc(t.title)+'<small>'+esc(name(t.owner))+' ・ '+LABEL[t.status]+'</small></span></button>').join('')+'<div class="tip-f">押すとやることリストで開きます</div>';
+  tip.hidden=false;
+  const r=el.getBoundingClientRect(),w=Math.min(300,window.innerWidth-24);
+  tip.style.width=w+'px';tip.style.left=Math.max(12,Math.min(r.left+window.scrollX,window.scrollX+window.innerWidth-w-12))+'px';
+  tip.style.top=(r.bottom+window.scrollY+4)+'px';
+  const th=tip.offsetHeight;if(r.bottom+4+th>window.innerHeight&&r.top-th-4>0)tip.style.top=(r.top+window.scrollY-th-4)+'px';
+}
+function hideTip(){clearTimeout(tipTimer);tipTimer=setTimeout(()=>{tip.hidden=true;tipKey=null},150)}
+calEl.addEventListener('mouseover',e=>{const s=e.target.closest('[data-tsum]');if(s)showTip(s)});
+calEl.addEventListener('mouseout',e=>{if(e.target.closest('[data-tsum]'))hideTip()});
+calEl.addEventListener('focusin',e=>{const s=e.target.closest('[data-tsum]');if(s)showTip(s)});
+tip.addEventListener('mouseenter',()=>clearTimeout(tipTimer));
+tip.addEventListener('mouseleave',hideTip);
+document.addEventListener('mousedown',e=>{if(!tip.hidden&&!tip.contains(e.target)&&!e.target.closest('[data-tsum]')){tip.hidden=true;tipKey=null}});
+// タスクを押す → やることリストで、詳細を開いた状態で表示
+tip.addEventListener('click',e=>{
+  const b=e.target.closest('[data-task]');if(!b)return;
+  tip.hidden=true;tipKey=null;
+  const id=b.dataset.task;open.add(id);st.hide=false;document.getElementById('fHide').checked=false;
+  showTab('tasks');renderTasks();
+  const row=document.querySelector('#tasks .task[data-id="'+id+'"]');
+  if(row){row.scrollIntoView({behavior:'smooth',block:'center'});row.classList.add('flash');setTimeout(()=>row.classList.remove('flash'),1600)}
 });
 document.getElementById('calAdd').addEventListener('click',e=>openPop(e.currentTarget.getBoundingClientRect(),{start:calSel,end:calSel}));
 document.getElementById('calDay').addEventListener('click',async e=>{
