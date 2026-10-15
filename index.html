@@ -560,7 +560,6 @@ body.present .blk{grid-template-columns:0 minmax(0,1fr)}
   <div class="sec-head"><h2 id="dayTitle">今日</h2>
     <div class="cal-head"><button type="button" id="dayPrev" aria-label="前の日">‹</button><button type="button" id="dayToday">今日</button><button type="button" id="dayNext" aria-label="次の日">›</button><input type="date" id="dayPick" aria-label="日付を選ぶ" class="btn2"></div>
   </div>
-  <div class="day-info" id="dayInfo"></div>
   <div class="day-layout">
     <div class="tt-wrap"><div class="tt" id="tt"></div></div>
     <div class="day-side">
@@ -2154,8 +2153,6 @@ function renderDay(){
   const d=D(dayKey), isToday=dayKey===iso(today);
   document.getElementById('dayTitle').textContent=(d.getMonth()+1)+'/'+d.getDate()+'（'+wd(dayKey)+'）'+(isToday?' 今日':'');
   document.getElementById('dayPick').value=dayKey;
-  const ch=dayChips(dayKey);
-  document.getElementById('dayInfo').innerHTML=ch.length?ch.join(''):'<span class="muted" style="font-size:13px">授業・集まり・予定はありません。</span>';
   // 時間割
   const H=(TT_TO-TT_FROM)*HH, y=m=>(m-TT_FROM*60)/60*HH;
   let h='<div class="tt-head"></div><div class="tt-head">'+esc(name('a'))+'</div><div class="tt-head">'+esc(name('b'))+'</div>';
