@@ -578,7 +578,7 @@ body.present .blk{grid-template-columns:0 minmax(0,1fr)}
 </section>
 
 <section>
-  <div class="sec-head"><h2>授業日</h2><span class="muted mono" style="font-size:13px">木 6時間 × 14日 ＋ 金 9時間 × 14日 ＝ 授業 210 時間</span></div>
+  <div class="sec-head"><h2>授業日</h2><span class="muted mono" style="font-size:13px">木 4.5時間（3〜5限）× 14日 ＋ 金 9時間（1〜6限）× 14日 ＝ 授業 189 時間</span></div>
   <div class="classes" id="classes"></div>
   <details class="note"><summary>授業日の前提</summary>金曜 14 回は指定どおり。木曜は「金曜の前日」と仮定して並べています（10/8・12/10 は金曜が休みのため除外）。実際の木曜日程が違う場合は教えてください。12/19〜1/7 は授業がない期間として、学校のプリンタでの本出力と VRM のウェイト・フェイシャルに充てています。</details>
 </section>
@@ -892,7 +892,7 @@ const CLASSES=[...FRI.map(s=>({d:D(s),w:'金'})),...THU.map(d=>({d,w:'木'}))].s
 
 // 作業できる時間（1 人あたりの目安）。木・金は授業、水・土はメンバーで集まって作業と打ち合わせ
 const WORK={
-  thu:{label:'授業（1〜4限）',time:'9:00–16:00',h:6,note:'休憩を除いて 6 時間。卒制以外の時間もあるので実際は少し短め'},
+  thu:{label:'授業（3〜5限）',time:'12:50–17:50',h:4.5,note:'休憩を除いて 4.5 時間。卒制以外の時間もあるので実際は少し短め'},
   fri:{label:'授業（1〜6限）',time:'9:00–19:30',h:9,note:'休憩を除いて 9 時間。卒制以外の時間もあるので実際は少し短め'},
   wed:{label:'集まって作業・打ち合わせ',time:'11:30–16:00',h:3.5,note:'昼食込み（作業は約 3.5 時間）'},
   sat:{label:'集まって作業・打ち合わせ',time:'11:30–20:00',h:7,note:'昼食・休憩込み（作業は約 7 時間）'}
