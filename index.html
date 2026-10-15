@@ -212,6 +212,7 @@ img{max-width:100%}
 .dl-row{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:baseline;padding:10px 14px;border-top:1px solid var(--line);font-size:14px}
 .dl-row:first-child{border-top:0}
 .dl-row b{font-size:18px;font-variant-numeric:tabular-nums}
+.tag-s{display:inline-block;font-size:10.5px;font-weight:700;color:var(--high);border:1px solid currentColor;border-radius:3px;padding:0 4px;margin-right:6px;vertical-align:1px}
 .dl-row.past{opacity:.45}
 .dl-row.next{box-shadow:inset 3px 0 0 var(--high)}
 .dl-row .left{font-size:12px;color:var(--muted);margin-left:2px}
@@ -458,13 +459,13 @@ img{max-width:100%}
       <span class="step maya done">キャラデザ（服なし）</span><span class="arr">→</span>
       <span class="step maya">素体モデル <em>途中</em></span><span class="arr">→</span>
       <span class="step maya">リグ・素体ウェイト</span><span class="arr">→</span>
-      <span class="step maya">ポーズアニメ（11/13 確定）</span>
+      <span class="step maya">ポーズアニメ（11/6 確定）</span>
     </div></div>
     <div class="lane"><div class="lane-h">衣装<small>Marvelous Designer</small></div><div class="steps">
       <span class="step">各自の衣装案（10/16 共有） <em>途中</em></span><span class="arr">→</span><span class="step">すり合わせ・確定（10/23）</span><span class="arr">→</span>
       <span class="step md">MD 練習</span><span class="arr">→</span><span class="tp">◆①</span><span class="arr">→</span>
       <span class="step md">アバター設定・T ポーズ衣装</span><span class="arr">→</span><span class="tp">◆②</span><span class="arr">→</span>
-      <span class="step md">アニメ読込・ポーズでシミュ</span><span class="arr">→</span>
+      <span class="step md">アニメ読込・ポーズでシミュ（11/19 中間報告で完成形）</span><span class="arr">→</span>
       <span class="step md">厚み付きで書き出し</span>
     </div></div>
     <div class="lane"><div class="lane-h">立体物<small>ZBrush → ChiTuBox</small></div><div class="steps">
@@ -496,20 +497,20 @@ img{max-width:100%}
 
   <div class="eyebrow">経験と対策</div>
   <div class="exp">
-    <div class="xp"><div class="xp-h">Marvelous Designer <span class="lv new">初めて</span></div><p>10/2〜10/23 を練習期間にし、10/23 に最初の受け渡しテスト。T ポーズ衣装の制作は 11/20 までと長めに取っています。</p></div>
+    <div class="xp"><div class="xp-h">Marvelous Designer <span class="lv new">初めて</span></div><p>10/2〜10/23 を練習期間にし、10/23 に最初の受け渡しテスト。T ポーズ衣装は 11/12、ポーズでの完成形は 11/19 の中間報告に合わせます。</p></div>
     <div class="xp"><div class="xp-h">ChiTuBox <span class="lv new">初めて</span></div><p>11 月中旬に先生の講習を受け、11/27 までにテスト出力。本出力の後に再出力用の予備を 1 週間置いています。</p></div>
-    <div class="xp"><div class="xp-h">ZBrush <span class="lv low">使用頻度が低い</span></div><p>10/30〜11/13 に練習期間。ポーズが決まった 11/13 から素体の造形を先に始め、作業期間を約 5 週間確保しています。</p></div>
+    <div class="xp"><div class="xp-h">ZBrush <span class="lv low">使用頻度が低い</span></div><p>10/30〜11/13 に練習期間。ポーズが決まる 11/6 から素体の造形を先に始め、作業期間を約 6 週間確保しています。</p></div>
     <div class="xp"><div class="xp-h">Maya <span class="lv ok">経験あり</span></div><p>素体・リグ・アニメ・リトポ・ウェイト・フェイシャルを担当。リグは早めに入れて、ポーズアニメに余裕を持たせます。</p></div>
-    <div class="xp"><div class="xp-h">Unity・VRM <span class="lv ok">経験あり</span></div><p>11/13 に素体だけで事前テストし、配布アニメ・プラグイン・3D ディスプレイの相性を先に確認。完成目標 1/15 ＋予備 1 週間。</p></div>
+    <div class="xp"><div class="xp-h">Unity・VRM <span class="lv ok">経験あり</span></div><p>11/2〜11/13 に素体だけで事前テストと質感テストをし、配布アニメ・プラグイン・3D ディスプレイの相性と見え方を先に確認。完成目標 1/15 ＋予備 1 週間、1/28 の最終提出に間に合わせます。</p></div>
   </div>
 
   <div class="eyebrow">受け渡しテスト（本番データでも書き出しのたびに同じ手順で確認）</div>
   <div class="tests">
     <div class="tst"><b>①</b><span class="mono">10/23</span><span>Maya → MD：素体をアバターとして読込 <span class="muted">単位・スケール・向き・ポリゴン数</span></span></div>
-    <div class="tst"><b>②</b><span class="mono">11/6</span><span>Maya → MD：テスト用アニメの読込 <span class="muted">FBX / Alembic、フレーム数</span></span></div>
+    <div class="tst"><b>②</b><span class="mono">10/30</span><span>Maya → MD：テスト用アニメの読込 <span class="muted">FBX / Alembic、フレーム数</span></span></div>
     <div class="tst"><b>③</b><span class="mono">11/13</span><span>Maya → Unity：素体だけで VRM 化 <span class="muted">プラグイン・配布アニメ・3D ディスプレイ表示</span></span></div>
-    <div class="tst"><b>④</b><span class="mono">11/19</span><span>MD → ZBrush：厚み付き書き出しと一体化 <span class="muted">縮尺後の肉厚・重なり</span></span></div>
-    <div class="tst"><b>⑤</b><span class="mono">11/20</span><span>MD → Maya：T ポーズ衣装をリトポ用に読込 <span class="muted">スケール・素体との位置</span></span></div>
+    <div class="tst"><b>④</b><span class="mono">11/18</span><span>MD → ZBrush：厚み付き書き出しと一体化 <span class="muted">縮尺後の肉厚・重なり</span></span></div>
+    <div class="tst"><b>⑤</b><span class="mono">11/13</span><span>MD → Maya：T ポーズ衣装をリトポ用に読込 <span class="muted">スケール・素体との位置</span></span></div>
     <div class="tst"><b>⑥</b><span class="mono">11/27</span><span>ZBrush → ChiTuBox → テスト出力 <span class="muted">水密・肉厚・サポート</span></span></div>
   </div>
 
@@ -566,6 +567,20 @@ img{max-width:100%}
     <div class="ex"><span class="k">モニター</span><h4>VRM モデルの映像</h4><p>Unity で動かした VRM を通常のモニターで見せる。</p></div>
     <div class="ex"><span class="k">3D ディスプレイ</span><h4>見る人の視点で立体表示</h4><p>ソニーの視線追従型ディスプレイ（空間再現ディスプレイと思われる）。</p></div>
   </div>
+  <div class="eyebrow">完成目標</div>
+  <div class="exhibit">
+    <div class="ex"><span class="k">フィギュア</span><h4>固定された造形でも、リアリティのある布表現</h4><p>MD で作った布のシミュレーションを生かし、止まった立体でも本物の布らしく見える衣装を一番の見せ場にする。</p></div>
+    <div class="ex"><span class="k">VRM</span><h4>テクスチャで質感を高いレベルで表現</h4><p>3D ディスプレイで近くから見ても、布・肌・髪・装飾の素材の違いが分かる。ZBrush のディテールをノーマルマップで生かす。</p></div>
+    <div class="ex"><span class="k">展示</span><h4>Unity で動かし、3D ディスプレイで見せる</h4><p>立体・モニター・3D ディスプレイの 3 つで展示する。</p></div>
+  </div>
+  <div class="eyebrow">学校の提出・報告</div>
+  <div class="decisions">
+    <div class="dec"><span class="tag">10/15</span><div><h4>企画案・スケジュール提出</h4></div></div>
+    <div class="dec"><span class="tag">10/29</span><div><h4>ビジュアル進捗報告</h4><p>絵コンテにあたるビジュアル（ポーズラフ、確定した衣装、展示イメージ、VRM の見せ方）で報告する。</p></div></div>
+    <div class="dec"><span class="tag">11/19</span><div><h4>中間報告：衣装の完成形</h4><p>MD でポーズを付けた衣装の完成形を見せる。</p></div></div>
+    <div class="dec"><span class="tag">1/28</span><div><h4>最終提出・講評会</h4><p>フィギュア・VRM・展示シーンをこの日までに完成させる。</p></div></div>
+    <div class="dec"><span class="tag">2/2〜2/6</span><div><h4>卒業制作展</h4></div></div>
+  </div>
   <div class="eyebrow">決定事項</div>
   <div class="decisions">
     <div class="dec"><span class="tag">キャラ</span><div><h4>オリジナルキャラクター（デザイン画あり）</h4><p>服なしのデザインは確定。衣装は各自で案を考えて 10/16 に共有し、10/23 にすり合わせて確定する。</p></div></div>
@@ -573,7 +588,7 @@ img{max-width:100%}
     <div class="dec"><span class="tag">VRM</span><div><h4>VRM の制作は確定</h4><p>動きは配布アニメーション、表情設定とカメラはプラグインを使う。</p></div></div>
     <div class="dec"><span class="tag">立体</span><div><h4>小さく、塗装なし、小物なし</h4><p>作り込みは ZBrush。分割はひとまず造形してから先生と相談する。</p></div></div>
     <div class="dec"><span class="tag">出力</span><div><h4>学校のプリンタ（ChiTuBox）</h4><p>使い方は先生に教わる。冬休み中も使用できる。</p></div></div>
-    <div class="dec"><span class="tag">ポーズ</span><div><h4>大きなポーズは 11/13 に確定</h4><p>体・手足の向きはここで固定。指先・表情などは ZBrush で後から調整できる。</p></div></div>
+    <div class="dec"><span class="tag">ポーズ</span><div><h4>大きなポーズは 11/6 に確定</h4><p>体・手足の向きはここで固定。指先・表情などは ZBrush で後から調整できる。</p></div></div>
     <div class="dec"><span class="tag">展示機材</span><div><h4>モニター等の手配は不要</h4><p>3D ディスプレイの機種と対応する Unity バージョンだけ確認する。</p></div></div>
     <div class="dec"><span class="tag">企業</span><div><h4>MD の会社とのやり取りは担当者と講師で実施済み</h4><p>こちらはプレゼンの中身の準備に集中する。</p></div></div>
   </div>
@@ -715,51 +730,56 @@ const CLASSES=[...FRI.map(s=>({d:D(s),w:'金'})),...THU.map(d=>({d,w:'木'}))].s
 const PHASES=[
  {id:'ph1',name:'準備・デザイン',span:'〜10/23',c:'gen'},
  {id:'ph8',name:'受け渡しテスト',span:'10/23〜11/27',c:'ink'},
- {id:'ph2',name:'素体・リグ・アニメ（Maya）',span:'〜11/13',c:'maya'},
- {id:'ph3',name:'衣装（Marvelous Designer）',span:'10/2〜11/27',c:'md'},
+ {id:'ph2',name:'素体・リグ・アニメ（Maya）',span:'〜11/6',c:'maya'},
+ {id:'ph3',name:'衣装（Marvelous Designer）',span:'10/2〜11/19',c:'md'},
  {id:'ph4',name:'立体物：作り込み（ZBrush）',span:'10/30〜12/16',c:'zb'},
- {id:'ph5',name:'立体物：分割・ChiTuBox・出力',span:'11/12〜1/29',c:'out'},
- {id:'ph7',name:'VRM（Maya → Unity）',span:'11/6〜1/29',c:'unity'},
- {id:'ph6',name:'プレゼン準備',span:'随時〜2/1',c:'gen'}
+ {id:'ph5',name:'立体物：分割・ChiTuBox・出力',span:'11/12〜1/27',c:'out'},
+ {id:'ph7',name:'VRM・テクスチャ（Maya → Unity）',span:'11/2〜1/27',c:'unity'},
+ {id:'ph6',name:'報告・プレゼン準備',span:'10/15〜2/1',c:'gen'}
 ];
 
-// [ラベル, 開始, 終了, 色(ソフト) と種類(learn=練習 / buf=予備), 担当(pair=二人 / a / b)]。'#' で始まる行は見出し
+// [ラベル, 開始, 終了, 色(ソフト) と種類(learn=練習 / buf=予備), 担当(pair=二人 / each=各自 / a / b)]。'#' で始まる行は見出し
 const ROWS=[
  ['#共通・衣装'],
  ['各自の衣装案','2026-10-01','2026-10-16','gen','each'],
- ['衣装案すり合わせ・確定','2026-10-16','2026-10-23','gen','pair'],
+ ['衣装すり合わせ・完成目標','2026-10-16','2026-10-23','gen','pair'],
  ['素体モデル仕上げ','2026-10-01','2026-10-23','maya','a'],
  ['MD 練習','2026-10-02','2026-10-23','md learn','pair'],
  ['リグ・素体ウェイト','2026-10-16','2026-10-30','maya','a'],
- ['ポーズアニメ','2026-10-30','2026-11-13','maya','a'],
- ['MD アバター・T ポーズ衣装','2026-10-23','2026-11-20','md','b'],
- ['MD ポーズシミュ・書き出し','2026-11-13','2026-11-27','md','b'],
+ ['ポーズアニメ','2026-10-26','2026-11-06','maya','a'],
+ ['MD アバター・T ポーズ衣装','2026-10-23','2026-11-12','md','b'],
+ ['MD ポーズシミュ・仕上げ','2026-11-06','2026-11-18','md','b'],
  ['#立体物'],
  ['ZBrush 練習','2026-10-30','2026-11-13','zb learn','b'],
- ['ポーズ素体の造形','2026-11-13','2026-12-04','zb','b'],
- ['衣装の作り込み・補強','2026-11-27','2026-12-16','zb','b'],
+ ['ポーズ素体の造形','2026-11-06','2026-12-04','zb','b'],
+ ['衣装の作り込み・補強','2026-11-19','2026-12-16','zb','b'],
  ['ChiTuBox 講習・テスト出力','2026-11-12','2026-11-27','out learn','pair'],
  ['分割・ChiTuBox 変換','2026-12-10','2026-12-18','out','pair'],
  ['本出力','2026-12-19','2027-01-08','out','b'],
  ['再出力の予備','2027-01-08','2027-01-15','buf','b'],
  ['洗浄・硬化・表面処理','2027-01-08','2027-01-22','out','b'],
- ['#VRM'],
- ['事前テスト（素体のみ）','2026-11-06','2026-11-13','unity','a'],
- ['リトポ（素体・衣装・髪）','2026-11-20','2026-12-11','maya','a'],
- ['UV 展開・テクスチャ','2026-12-04','2026-12-25','gen','a'],
+ ['組み立て・最終調整','2027-01-22','2027-01-27','out','pair'],
+ ['#VRM・テクスチャ'],
+ ['事前テスト・質感テスト','2026-11-02','2026-11-13','unity','a'],
+ ['リトポ（素体・衣装・髪）','2026-11-13','2026-12-11','maya','a'],
+ ['UV 展開','2026-12-11','2026-12-18','maya','a'],
+ ['テクスチャ本制作','2026-12-18','2027-01-15','gen','b'],
  ['ウェイト・揺れもの','2026-12-18','2027-01-08','maya','a'],
  ['フェイシャル','2026-12-25','2027-01-08','maya','a'],
  ['VRM 化・プラグイン・配布アニメ','2027-01-08','2027-01-15','unity','a'],
  ['VRM の予備（エラー対応）','2027-01-15','2027-01-22','buf','a'],
- ['モニター・3D 表示シーン','2027-01-15','2027-01-29','unity','pair'],
- ['#プレゼン'],
- ['制作記録（随時）','2026-10-01','2027-01-29','light','pair'],
- ['プレゼン資料・パネル','2027-01-08','2027-01-29','gen','pair'],
- ['リハーサル','2027-01-26','2027-02-01','gen','pair'],
+ ['モニター・3D 表示シーン','2027-01-15','2027-01-27','unity','pair'],
+ ['#報告・プレゼン'],
+ ['10/29 報告用ビジュアル','2026-10-23','2026-10-28','gen','pair'],
+ ['11/19 中間報告の準備','2026-11-13','2026-11-18','gen','pair'],
+ ['講評用資料・プレゼン','2027-01-08','2027-01-27','gen','pair'],
+ ['講評を受けて調整','2027-01-29','2027-02-01','gen','pair'],
+ ['制作記録（随時）','2026-10-01','2027-01-27','light','pair'],
  ['卒業制作展','2027-02-02','2027-02-06','event','']
 ];
-const TESTS=[['2026-10-23','①'],['2026-11-06','②'],['2026-11-13','③'],['2026-11-19','④'],['2026-11-20','⑤'],['2026-11-27','⑥']];
-const MS=[['2026-10-16','衣装案共有'],['2026-10-23','衣装デザイン確定'],['2026-11-13','ポーズ確定'],['2026-11-20','T衣装確定'],['2026-12-18','出力データ確定'],['2027-01-15','VRM完成'],['2027-02-02','卒展']];
+const TESTS=[['2026-10-23','①'],['2026-10-30','②'],['2026-11-13','③'],['2026-11-13','⑤'],['2026-11-18','④'],['2026-11-27','⑥']];
+// [日付, 名前, 's'=学校の提出・報告]
+const MS=[['2026-10-15','企画案・スケジュール提出','s'],['2026-10-16','衣装案共有'],['2026-10-23','衣装デザイン確定'],['2026-10-29','ビジュアル進捗報告','s'],['2026-11-06','ポーズ確定'],['2026-11-12','T衣装確定'],['2026-11-19','中間報告（衣装の完成形）','s'],['2026-12-18','出力データ確定'],['2027-01-15','VRM完成'],['2027-01-28','最終提出・講評会','s'],['2027-02-02','卒展','s']];
 
 // stats
 document.getElementById('sDays').textContent=Math.max(0,diff(D('2027-02-02'),today));
@@ -788,7 +808,7 @@ function drawGantt(){
     h+='<div class="g-row"><div class="g-label" title="'+r[0]+'">'+r[0]+'</div><div class="g-track" style="width:'+(W+150)+'px"><div class="g-bar '+r[3]+'" style="left:'+x(s)+'px;width:'+w+'px" title="'+r[0]+' '+span+'"></div>'+tag+'</div></div>';
   });
   const off=window.matchMedia('(max-width:720px)').matches?120:168;
-  MS.forEach((m,i)=>{h+='<div class="g-ms" style="left:'+(off+x(D(m[0])))+'px"><em style="bottom:'+(i%2?18:2)+'px">'+fmt(D(m[0]))+' '+m[1]+'</em></div>'});
+  MS.forEach((m,i)=>{h+='<div class="g-ms" style="left:'+(off+x(D(m[0])))+'px"><em style="bottom:'+[2,18,34][i%3]+'px">'+fmt(D(m[0]))+' '+m[1]+'</em></div>'});
   if(today>=start&&today<=end) h+='<div class="g-ms today" style="left:'+(off+x(today)+3)+'px"><em>今日</em></div>';
   g.innerHTML=h;
 }
@@ -809,10 +829,10 @@ function drawGantt(){
 
 // 締切までの日数（ホーム）
 (function(){
-  const DL=[...MS.slice(0,-1),['2027-01-29','最終授業'],['2027-02-02','卒業制作展']].sort((a,b)=>a[0]<b[0]?-1:1);
+  const DL=[...MS].sort((a,b)=>a[0]<b[0]?-1:1);
   const nextIdx=DL.findIndex(m=>D(m[0])>=today);
   document.getElementById('deadlines').innerHTML=DL.map((m,i)=>{const n=diff(D(m[0]),today);
-    return '<div class="dl-row'+(n<0?' past':'')+(i===nextIdx?' next':'')+'"><span class="mono">'+fmt(D(m[0]))+'</span><span>'+m[1]+'</span><span>'+(n<0?'<span class="left">済</span>':n===0?'<b>今日</b>':'<span class="left">あと</span> <b>'+n+'</b><span class="left">日</span>')+'</span></div>'}).join('');
+    return '<div class="dl-row'+(n<0?' past':'')+(i===nextIdx?' next':'')+'"><span class="mono">'+fmt(D(m[0]))+'</span><span>'+(m[2]==='s'?'<span class="tag-s">学校</span>':'')+m[1]+'</span><span>'+(n<0?'<span class="left">済</span>':n===0?'<b>今日</b>':'<span class="left">あと</span> <b>'+n+'</b><span class="left">日</span>')+'</span></div>'}).join('');
   if(nextIdx>=0){document.getElementById('sNext').textContent=diff(D(DL[nextIdx][0]),today);document.getElementById('sNextLabel').textContent='次の締切「'+DL[nextIdx][1]+'」まで（日）'}
 })();
 
@@ -886,7 +906,7 @@ let calMonth=new Date(today.getFullYear(),today.getMonth(),1), calSel=iso(today)
 function dayItems(key){
   const ev=[];
   MS.forEach(m=>{if(m[0]===key)ev.push({k:'ms',t:m[1]})});
-  if(key==='2027-01-29')ev.push({k:'ms',t:'最終授業'});
+
   TESTS.forEach(t=>{if(t[0]===key)ev.push({k:'tst',t:'テスト'+t[1]})});
   CLASSES.forEach(c=>{if(iso(c.d)===key)ev.push({k:'cls',t:c.w+'曜授業'})});
   tasks.filter(t=>t.due===key).sort((a,b)=>(a.order||0)-(b.order||0)).forEach(t=>ev.push({k:'task',t:t.title,c:phaseOf(t.phase).c,done:t.status==='done',owner:t.owner,status:t.status}));
@@ -1006,6 +1026,37 @@ async function seedEventsOnce(){
     const batch=fsWriteBatch(fbDb);
     Object.entries(SEED_EVENTS).forEach(([id,e])=>batch.set(fsDoc(fbDb,'sotsusei','board','events',id),Object.assign({},e,{by:who(),createdAt:Date.now(),updatedAt:Date.now()})));
     batch.set(boardRef,{eventsSeeded:true},{merge:true});
+    await batch.commit();
+  }catch(err){console.error(err)}
+}
+
+// 10/15 の計画見直し（学校の節目に合わせた期限の変更とタスク追加）。一度だけ実行
+const PLAN_V2={
+  due:{k11:'2026-10-30',k13:'2026-11-18',k14:'2026-11-13',k23:'2026-11-04',k24:'2026-11-06',k32:'2026-11-12',k33:'2026-11-12',k34:'2026-11-12',k35:'2026-11-12',k36:'2026-11-18',k37:'2026-11-18',k38:'2026-11-25',k41:'2026-12-04',k59:'2027-01-27',k66:'2026-12-18',k72:'2027-01-27',k73:'2027-01-27',k83:'2027-01-27'},
+  patch:{k66:{title:'UV 展開',owner:'a'},k41:{note:'11/6 のポーズ確定後すぐ始める'}},
+  add:{
+    n01:{title:'企画案・スケジュール提出',phase:'ph1',owner:'both',due:'2026-10-15',note:''},
+    n06:{title:'完成目標（見せ場）と質感の方針（トゥーン調 / リアル寄り）を決める',phase:'ph1',owner:'both',due:'2026-10-23',note:''},
+    n02:{title:'報告用ビジュアルの準備（ポーズラフ・確定衣装・展示イメージ・VRM の見せ方）',phase:'ph6',owner:'both',due:'2026-10-28',note:'絵コンテにあたるもの'},
+    n03:{title:'ビジュアル進捗報告',phase:'ph6',owner:'both',due:'2026-10-29',note:''},
+    n04:{title:'中間報告の準備（MD でポーズを付けた衣装の完成形）',phase:'ph6',owner:'both',due:'2026-11-18',note:''},
+    n05:{title:'中間報告（衣装の完成形）',phase:'ph6',owner:'both',due:'2026-11-19',note:''},
+    n07:{title:'質感テスト（素体で材質を試し、3D ディスプレイで見え方を確認）',phase:'ph7',owner:'b',due:'2026-11-13',note:''},
+    n08:{title:'テクスチャ本制作（ZBrush からノーマルマップを焼き付け）',phase:'ph7',owner:'b',due:'2027-01-15',note:'素材ごとに描き分け：肌・髪・薄布・帯・装飾'},
+    n09:{title:'最終提出・講評会',phase:'ph6',owner:'both',due:'2027-01-28',note:''},
+    n10:{title:'講評を受けて最終調整',phase:'ph6',owner:'both',due:'2027-02-01',note:''}
+  }
+};
+let planChecked=false;
+async function migratePlanV2(){
+  if(planChecked||!tasks.length)return;planChecked=true;
+  try{
+    const snap=await fsGetDoc(boardRef);
+    if(snap.exists()&&snap.data().planV2)return;
+    const ids=new Set(tasks.map(t=>t.id)), now=Date.now(), batch=fsWriteBatch(fbDb);
+    Object.entries(PLAN_V2.due).forEach(([id,due])=>{if(ids.has(id))batch.update(taskRef(id),Object.assign({due,updatedBy:who(),updatedAt:now},PLAN_V2.patch[id]||{}))});
+    Object.entries(PLAN_V2.add).forEach(([id,t],i)=>{if(!ids.has(id))batch.set(taskRef(id),Object.assign({status:'todo',subs:[],order:90+i,updatedBy:who(),updatedAt:now},t))});
+    batch.set(boardRef,{planV2:true},{merge:true});
     await batch.commit();
   }catch(err){console.error(err)}
 }
@@ -1159,7 +1210,7 @@ window.startBoard=function(){
   unsubs.push(fsOnSnapshot(eventsCol,s=>{events=s.docs.map(d=>Object.assign({id:d.id},d.data()));renderHome();renderCal()},err=>console.error(err)));
   let got=0;const ready=()=>{if(++got===3){loaded=true;renderAll()}};
   let r1=false,r2=false,r3=false;
-  unsubs.push(fsOnSnapshot(tasksCol,s=>{tasks=s.docs.map(d=>Object.assign({id:d.id},d.data()));if(!r1){r1=true;ready()}renderHome();renderCal();renderTasks()},err=>{fail(err,'タスクを読み込めませんでした。ページを再読み込みしてください。');if(!r1){r1=true;ready()}}));
+  unsubs.push(fsOnSnapshot(tasksCol,s=>{tasks=s.docs.map(d=>Object.assign({id:d.id},d.data()));if(!r1){r1=true;ready()}migratePlanV2();renderHome();renderCal();renderTasks()},err=>{fail(err,'タスクを読み込めませんでした。ページを再読み込みしてください。');if(!r1){r1=true;ready()}}));
   unsubs.push(fsOnSnapshot(matsCol,s=>{materials=s.docs.map(d=>Object.assign({id:d.id},d.data()));if(!r2){r2=true;ready()}renderMats()},err=>{console.error(err);if(!r2){r2=true;ready()}}));
   unsubs.push(fsOnSnapshot(postsCol,s=>{posts=s.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));if(!r3){r3=true;ready()}renderHome();renderPosts()},err=>{console.error(err);if(!r3){r3=true;ready()}}));
   unsubs.push(fsOnSnapshot(boardRef,s=>{const d=(s.exists()&&s.data().members)||{};members={a:d.a||'',b:d.b||''};drawGantt();
