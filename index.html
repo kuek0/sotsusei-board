@@ -497,6 +497,32 @@ body.present .blk{grid-template-columns:0 minmax(0,1fr)}
   .t-row,.form-row{grid-template-columns:1fr}
   .dl-row{grid-template-columns:52px 1fr auto}
 }
+/* 見た目の方針：角丸は使わない。区切りや状態を示す必要がないところには枠線を付けず、背景色の差で分ける */
+*,*::before,*::after{border-radius:0!important}
+.ic,.dot,.ev .dot,.sw,.cday .dn,.tt-now::before,.lb-close,.pr-prev button{border-radius:50%!important}
+.stats,.box,.hero-card,.dl,.up-item,.task,.mat,.post,.pr,.lane,.xp,.tests,.decisions,.ex,.doc-wrap,.tt-wrap,.form,.gantt-scroll,.seedbox,.cd,.cal,.tip,.qpop,.slash,.gate-card,.pr-prev figure,.t-image img,.qp-rep,.qp-tpl .tpl,.seg{border:0!important}
+.sec-head{border-bottom:0!important;padding-bottom:0!important}
+.empty{border:0!important;background:var(--soft)}
+.hero-next{box-shadow:inset 4px 0 0 var(--high)}
+.qp-rep{background:var(--soft)}
+/* ボタン・入力欄：枠ではなく背景色で示す */
+.btn2,.cal-head button,.userbar button,.seg button,.qp-types button,.qp-tpl .tpl button,.qp-dows button,.slash button i,.task select{border:0!important;background:var(--soft)}
+.qp-types button[aria-pressed="true"],.qp-dows button[aria-pressed="true"],.seg button[aria-pressed="true"]{background:var(--ink)!important;color:var(--bg)!important}
+.cal-head .add-ev{background:var(--ink)!important;color:var(--bg)!important}
+input:not([type=checkbox]):not([type=file]),select,textarea{border:0!important;background:var(--soft)}
+.form input:not([type=checkbox]),.form select,.form textarea,.form .btn2{background:var(--surface)}
+.qpop #qpTitle{background:transparent;border-bottom:2px solid var(--line)!important}
+.qpop #qpTitle:focus{border-bottom-color:var(--accent)!important}
+:focus-visible{outline:2px solid var(--accent)!important;outline-offset:1px}
+/* 札・ラベル：枠線ではなく薄い塗りで */
+.tag-s{border:0!important;background:color-mix(in srgb,var(--high) 12%,transparent);padding:0 5px}
+.tag-s.mid{background:color-mix(in srgb,var(--doing) 14%,transparent)}
+.lv{border:0!important;background:color-mix(in srgb,currentColor 12%,transparent);padding:0 8px}
+.st{border:0!important;background:color-mix(in srgb,currentColor 12%,transparent)}
+.g-who{border:0!important;background:var(--soft);color:var(--ink)}
+.g-who.pair{background:var(--ink);color:var(--surface)}
+.pr-h .ph,.day-info .chip{border:0!important;background:var(--soft)}
+.ex .k,.xp-h{border:0}
 </style>
 </head>
 <body>
