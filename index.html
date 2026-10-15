@@ -458,6 +458,15 @@ body.present .blk{grid-template-columns:0 minmax(0,1fr)}
     <div class="hero-card" id="homeToday"></div>
     <div class="hero-card" id="homeNext"></div>
   </div>
+  <div style="display:grid;gap:8px">
+    <div class="sec-head"><h2>全体の進み具合</h2></div>
+    <div class="stats">
+      <div class="stat"><b class="mono" id="sProg">–</b><span>タスク完了率</span><div class="bar"><i id="sBar"></i></div></div>
+      <div class="stat"><b class="mono" id="sNext">–</b><span id="sNextLabel">次の締切まで（日）</span></div>
+      <div class="stat"><b class="mono" id="sDays">–</b><span>卒業制作展 2/2 まで（日）</span></div>
+      <div class="stat"><b class="mono" id="sClass">–</b><span>残りの授業日（木・金）</span></div>
+    </div>
+  </div>
   <div class="home-cols">
     <div>
       <div class="sec-head"><h2>2 週間以内のタスク</h2><button class="btn2" type="button" data-goto="tasks">やることリストへ</button></div>
@@ -474,18 +483,9 @@ body.present .blk{grid-template-columns:0 minmax(0,1fr)}
       <div class="dl" id="deadlines"></div>
     </div>
     <div>
-      <div class="sec-head"><h2>全体の進み具合</h2></div>
-      <div class="stats stats2">
-        <div class="stat"><b class="mono" id="sDays">–</b><span>卒業制作展 2/2 まで（日）</span></div>
-        <div class="stat"><b class="mono" id="sNext">–</b><span id="sNextLabel">次の締切まで（日）</span></div>
-        <div class="stat"><b class="mono" id="sClass">–</b><span>残りの授業日（木・金）</span></div>
-        <div class="stat"><b class="mono" id="sProg">–</b><span>タスク完了率</span><div class="bar"><i id="sBar"></i></div></div>
-      </div>
+      <div class="sec-head"><h2>掲示板</h2><button class="btn2" type="button" data-goto="board">すべて見る・投稿する</button></div>
+      <div class="posts" id="homePosts"></div>
     </div>
-  </div>
-  <div style="display:grid;gap:8px">
-    <div class="sec-head"><h2>掲示板</h2><button class="btn2" type="button" data-goto="board">すべて見る・投稿する</button></div>
-    <div class="posts" id="homePosts"></div>
   </div>
 </div>
 
