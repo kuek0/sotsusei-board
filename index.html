@@ -274,6 +274,13 @@ img{max-width:100%}
 .qp-tpl .tpl button.x.arm{color:var(--high);font-weight:700}
 .qp-sub{flex-wrap:wrap;gap:4px 10px}
 .qp-acts .qp-multi,.qp-acts .qp-tplsave{border:0;background:none;color:var(--accent);font-size:12.5px;padding:4px}
+.qp-rep{display:grid;gap:6px;padding:8px;border:1px dashed var(--line);border-radius:6px}
+.qp-rep select{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:3px 6px;font:inherit;font-size:13px;color:var(--ink)}
+.qp-dows{display:flex;gap:4px}
+.qp-dows button{width:30px;height:28px;border:1px solid var(--line);background:var(--surface);border-radius:4px;font-size:12.5px;color:var(--ink);padding:0}
+.qp-dows button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
+.qp-scope{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--accent);font-weight:700}
+.qp-scope input{width:15px;height:15px;margin:0}
 .qp-acts{display:flex;gap:8px;align-items:center}
 .qp-acts .sp{flex:1}
 .qp-acts .qp-save{border:0;background:var(--accent);color:var(--surface);border-radius:4px;padding:6px 16px;font-weight:700}
@@ -1281,11 +1288,19 @@ function drawPop(){
     '<div class="qp-types qp-imp"><span class="muted" style="font-size:12px;align-self:center">重要度</span>'+Object.entries(IMP).map(([k,v])=>'<button type="button" data-imp="'+k+'" aria-pressed="'+((qp.imp||'')===k)+'">'+v+'</button>').join('')+'</div>'+
     '<div class="qp-colors"><span class="muted">色</span>'+QP_COLORS.map(c=>'<button type="button" class="sw'+(c?'':' auto')+'" data-color="'+c+'" aria-pressed="'+((qp.color||'')===c)+'" title="'+(c?c:'種類に合わせる')+'" style="--c:var(--'+(c||(EVT[qp.type]||EVT.other).c)+')">'+(c?'':'自')+'</button>').join('')+'</div>'+
     '<textarea id="qpNote" rows="2" placeholder="メモ（任意）" maxlength="500">'+esc(qp.note)+'</textarea>'+
-    '<div class="qp-acts qp-sub">'+(isEdit?'<button type="button" class="qp-del'+(qpArm?' arm':'')+'">'+(qpArm?'本当に削除':'削除')+'</button><button type="button" class="qp-copy">他の日にコピー（複数可）</button>':'<button type="button" class="qp-multi">複数の日に追加</button>')+'<button type="button" class="qp-tplsave">テンプレに保存</button><span class="muted" id="qpMsg" style="font-size:11.5px"></span></div>'+
+    (isEdit?(qp.series?'<label class="qp-scope"><input type="checkbox" id="qpScope"'+(qp.scope?' checked':'')+'> この日以降の繰り返しもまとめて変更・削除</label>':''):
+      '<div class="qp-rep"><div class="qp-row"><span class="muted" style="font-size:12px;white-space:nowrap">繰り返し</span><select id="qpFreq">'+[['none','しない'],['weekly','毎週'],['biweekly','2 週ごと'],['daily','毎日']].map(([k,v])=>'<option value="'+k+'"'+(qp.rep.freq===k?' selected':'')+'>'+v+'</option>').join('')+'</select>'+
+      (qp.rep.freq!=='none'?'<span class="muted" style="font-size:12px;white-space:nowrap">まで</span><input type="date" id="qpUntil" value="'+qp.rep.until+'" aria-label="繰り返しの終了日">':'')+'</div>'+
+      (qp.rep.freq==='weekly'||qp.rep.freq==='biweekly'?'<div class="qp-dows">'+'日月火水木金土'.split('').map((d,i)=>'<button type="button" data-dow="'+i+'" aria-pressed="'+qp.rep.days.includes(i)+'">'+d+'</button>').join('')+'</div>':'')+
+      (qp.rep.freq!=='none'?'<div class="muted" style="font-size:12px">全 '+repDates(qp).length+' 回登録されます</div>':'')+'</div>')+
+    '<div class="qp-acts qp-sub">'+(isEdit?'<button type="button" class="qp-del'+(qpArm?' arm':'')+'">'+(qpArm?(qp.series&&qp.scope?'以降をすべて削除':'本当に削除'):'削除')+'</button><button type="button" class="qp-copy">他の日にコピー（複数可）</button>':'<button type="button" class="qp-multi">複数の日に追加</button>')+'<button type="button" class="qp-tplsave">テンプレに保存</button><span class="muted" id="qpMsg" style="font-size:11.5px"></span></div>'+
     '<div class="qp-acts"><span class="sp"></span><button type="button" class="btn2 qp-cancel">閉じる</button><button type="button" class="qp-save">'+(isEdit?'保存':'追加')+'</button></div>';
 }
 function openPop(rect,data){
-  qp=Object.assign({id:null,title:'',type:'meeting',color:'',note:'',imp:'',time:'',endTime:''},data);qpArm=false;
+  qp=Object.assign({id:null,title:'',type:'meeting',color:'',note:'',imp:'',time:'',endTime:'',series:'',scope:false},data);qpArm=false;
+  // 繰り返しの初期値：開始日の曜日を毎週、4 週間後まで
+  const u=D(qp.start);u.setDate(u.getDate()+28);
+  qp.rep={freq:'none',days:[D(qp.start).getDay()],until:iso(u)};
   drawPop();pop.hidden=false;
   const w=Math.min(330,window.innerWidth-24), x=Math.max(12,Math.min(rect.left+window.scrollX,window.scrollX+window.innerWidth-w-12));
   pop.style.width=w+'px';pop.style.left=x+'px';pop.style.top=(rect.bottom+window.scrollY+6)+'px';
@@ -1293,8 +1308,19 @@ function openPop(rect,data){
   paintRange();
   const t=document.getElementById('qpTitle');t.focus();t.select();
 }
-const evData=ev=>({id:ev.id,title:ev.title||'',start:ev.start,end:ev.end||ev.start,type:EVT[ev.type]?ev.type:'other',color:ev.color||'',note:ev.note||'',imp:impOf(ev),time:ev.time||'',endTime:ev.endTime||''});
+const evData=ev=>({id:ev.id,title:ev.title||'',start:ev.start,end:ev.end||ev.start,type:EVT[ev.type]?ev.type:'other',color:ev.color||'',note:ev.note||'',imp:impOf(ev),time:ev.time||'',endTime:ev.endTime||'',series:ev.series||''});
+// 繰り返しで登録する日付の一覧（開始日〜終了日、最大 200 回）
+function repDates(q){
+  const r=q.rep;if(!r||r.freq==='none')return [q.start];
+  const out=[],s=D(q.start),u=r.until&&r.until>=q.start?D(r.until):s;
+  for(let d=new Date(s);d<=u&&out.length<200;d.setDate(d.getDate()+1)){
+    if(r.freq==='daily'||(r.days.includes(d.getDay())&&(r.freq==='weekly'||Math.floor((diff(d,s)+s.getDay())/7)%2===0)))out.push(iso(d));
+  }
+  return out;
+}
 function readPop(){
+  const sc=document.getElementById('qpScope');if(sc)qp.scope=sc.checked;
+  const fr=document.getElementById('qpFreq');if(fr){qp.rep.freq=fr.value;const un=document.getElementById('qpUntil');if(un&&un.value)qp.rep.until=un.value}
   qp.title=document.getElementById('qpTitle').value;qp.note=document.getElementById('qpNote').value;
   qp.start=document.getElementById('qpStart').value||qp.start;qp.end=document.getElementById('qpEnd').value||qp.start;
   qp.time=document.getElementById('qpTime').value;qp.endTime=document.getElementById('qpEndTime').value;
@@ -1305,11 +1331,33 @@ const evPayload=q=>({title:q.title.trim(),start:q.start,end:q.end,type:q.type,co
 async function savePop(){
   readPop();
   if(!qp.title.trim()){const t=document.getElementById('qpTitle');t.focus();t.placeholder='予定の名前を入れてください';return}
-  const data=evPayload(qp), id=qp.id;closePop();
+  const q=Object.assign({},qp,{rep:Object.assign({},qp.rep)}), data=evPayload(q), id=q.id;closePop();
   try{
-    if(id)await fsUpdateDoc(fsDoc(fbDb,'sotsusei','board','events',id),data);
+    if(id&&q.series&&q.scope){
+      // この日以降の同じ繰り返しの予定に、日付以外の変更をまとめて反映
+      const {start,end,...common}=data;
+      const targets=events.filter(e=>e.series===q.series&&e.start>=q.start&&e.id!==id);
+      await writeChunks([[ 'update',id,data ],...targets.map(e=>['update',e.id,common])]);
+    }else if(id)await fsUpdateDoc(fsDoc(fbDb,'sotsusei','board','events',id),data);
+    else if(q.rep.freq!=='none'){
+      // 繰り返し：1 回ずつ別の予定として登録（あとから 1 日だけ直したり消したりできる）
+      const span=diff(D(q.end),D(q.start)), series='s'+Date.now().toString(36), now=Date.now();
+      await writeChunks(repDates(q).map(k=>{const en=D(k);en.setDate(en.getDate()+span);return ['set',null,Object.assign({},data,{start:k,end:iso(en),series,rep:{freq:q.rep.freq,days:q.rep.days,until:q.rep.until},createdAt:now})]}));
+    }
     else await fsAddDoc(eventsCol,Object.assign(data,{createdAt:Date.now()}));
   }catch(err){fail(err,'予定を保存できませんでした。')}
+}
+// まとめて書き込む（1 回のバッチは 400 件まで）
+async function writeChunks(ops){
+  for(let i=0;i<ops.length;i+=400){
+    const batch=fsWriteBatch(fbDb);
+    ops.slice(i,i+400).forEach(([op,id,data])=>{
+      if(op==='set')batch.set(id?fsDoc(fbDb,'sotsusei','board','events',id):fsDoc(eventsCol),data);
+      else if(op==='update')batch.update(fsDoc(fbDb,'sotsusei','board','events',id),data);
+      else batch.delete(fsDoc(fbDb,'sotsusei','board','events',id));
+    });
+    await batch.commit();
+  }
 }
 // 他の日へのコピー：コピー元を覚えて、カレンダーで日付を選ぶ
 function startCopy(src){copyMode={src,days:new Set()};closePop();renderCal();document.getElementById('copyBar').scrollIntoView({behavior:'smooth',block:'nearest'})}
@@ -1333,6 +1381,7 @@ document.getElementById('copyBar').addEventListener('click',async e=>{
 pop.addEventListener('click',async e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.type){readPop();qp.type=b.dataset.type;drawPop();return}
+  if(b.dataset.dow!==undefined){readPop();const n=+b.dataset.dow,ds=qp.rep.days;ds.includes(n)?(ds.length>1&&ds.splice(ds.indexOf(n),1)):ds.push(n);drawPop();return}
   if(b.dataset.imp!==undefined){readPop();qp.imp=b.dataset.imp;drawPop();return}
   if(b.dataset.color!==undefined){readPop();qp.color=b.dataset.color;drawPop();return}
   if(b.classList.contains('qp-cancel'))return closePop();
@@ -1352,14 +1401,18 @@ pop.addEventListener('click',async e=>{
   }
   if(b.classList.contains('qp-del')){
     if(!qpArm){readPop();qpArm=true;drawPop();return}
-    const id=qp.id;closePop();try{await fsDeleteDoc(fsDoc(fbDb,'sotsusei','board','events',id))}catch(err){fail(err)}
+    const id=qp.id,ser=qp.series,sc=qp.scope,st=qp.start;closePop();
+    try{if(ser&&sc)await writeChunks(events.filter(x=>x.series===ser&&x.start>=st).map(x=>['delete',x.id]));else await fsDeleteDoc(fsDoc(fbDb,'sotsusei','board','events',id))}catch(err){fail(err)}
   }
 });
 pop.addEventListener('keydown',e=>{
   if(e.key==='Escape'){e.preventDefault();closePop();return}
   if(e.key==='Enter'&&e.target.id==='qpTitle'&&!e.isComposing&&e.keyCode!==229){e.preventDefault();savePop()}
 });
-pop.addEventListener('change',e=>{if(e.target.id==='qpStart'||e.target.id==='qpEnd'){readPop();if(!qp.id)paintRange()}});
+pop.addEventListener('change',e=>{
+  if(e.target.id==='qpStart'||e.target.id==='qpEnd'){readPop();if(!qp.id)paintRange()}
+  if(['qpFreq','qpUntil','qpScope','qpStart'].includes(e.target.id)){readPop();drawPop()}
+});
 document.addEventListener('mousedown',e=>{if(qp&&!pop.contains(e.target)&&!e.target.closest('#cal [data-ev],#calDay [data-ev],#calAdd'))closePop()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&copyMode){copyMode=null;renderCal()}});
 
