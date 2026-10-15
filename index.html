@@ -295,6 +295,52 @@ img{max-width:100%}
 .post-h .acts button{border:0;background:none;color:var(--muted);font-size:12px;padding:2px 4px}
 .post-h .acts button.arm{color:var(--high);font-weight:700}
 .post-body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;margin:0}
+/* ホームの最上段 */
+.hero{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.hero-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px 20px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.hero-card h2{font-size:18px}
+.hero-card .k{font-size:11.5px;letter-spacing:.12em;color:var(--muted);font-weight:700}
+.hero-card .big{font-size:52px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.hero-card .big small{font-size:16px;font-weight:700;margin-left:4px;color:var(--muted)}
+.hero-card .foot{margin-top:auto;display:flex;flex-wrap:wrap;gap:8px}
+.hero-next{border-color:var(--high)}
+.sess{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:3px 10px;border-radius:999px;background:var(--soft);font-weight:500}
+.sess .ic{width:16px;height:16px}
+.today-list{display:grid;gap:4px}
+.ti{display:grid;grid-template-columns:96px 1fr auto;gap:10px;align-items:baseline;font-size:14px;padding:6px 0;border-top:1px dashed var(--line)}
+.ti:first-child{border-top:0}
+.ti .mono{font-size:12.5px;color:var(--muted)}
+.ti.done span:nth-child(2){color:var(--muted);text-decoration:line-through}
+.stats2{grid-template-columns:repeat(2,minmax(0,1fr))}
+/* 今日（時間割） */
+.day-info{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.day-info .chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:3px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line);max-width:100%}
+.day-info .chip .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.day-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}
+.day-side{display:grid;gap:12px;min-width:0}
+.tt-wrap{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.tt{position:relative;display:grid;grid-template-columns:52px repeat(2,minmax(0,1fr))}
+.tt-head{position:sticky;top:0;z-index:3;background:var(--soft);font-size:12.5px;font-weight:700;text-align:center;height:32px;line-height:31px;border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.tt-times{position:relative}
+.tt-times span{position:absolute;right:6px;font-size:11px;color:var(--muted);transform:translateY(-50%);font-variant-numeric:tabular-nums}
+.tt-col{position:relative;border-left:1px solid var(--line);cursor:copy;background-image:repeating-linear-gradient(to bottom,var(--line) 0 1px,transparent 1px var(--hh))}
+.tt-sess{position:absolute;left:0;right:0;background:color-mix(in srgb,var(--accent) 9%,transparent);border-top:1px dashed color-mix(in srgb,var(--accent) 50%,transparent);border-bottom:1px dashed color-mix(in srgb,var(--accent) 50%,transparent);pointer-events:none}
+.tt-sess span{position:absolute;top:2px;right:4px;font-size:10.5px;color:var(--accent);font-weight:700}
+.slot{position:absolute;z-index:2;border-radius:4px;padding:3px 6px;font-size:12px;line-height:1.35;overflow:hidden;cursor:pointer;background:color-mix(in srgb,var(--c) 22%,var(--surface));box-shadow:inset 3px 0 0 var(--c);color:var(--ink);border:0;text-align:left;display:flex;flex-direction:column;gap:1px}
+.slot b{font-size:11px;font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700}
+.slot .st2{overflow:hidden;text-overflow:ellipsis}
+.slot.done{opacity:.55}
+.slot.done .st2{text-decoration:line-through}
+.slot.editing{outline:2px solid var(--accent)}
+.slot .chk2{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:3px;border:1px solid var(--line);background:var(--surface);font-size:11px;line-height:16px;text-align:center;padding:0;color:var(--done)}
+.tt-now{position:absolute;left:52px;right:0;height:0;border-top:2px solid var(--high);z-index:4;pointer-events:none}
+.tt-now::before{content:"";position:absolute;left:-5px;top:-5px;width:8px;height:8px;border-radius:50%;background:var(--high)}
+.daynote{width:100%;min-height:120px;border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:8px;font:inherit;font-size:13.5px;color:var(--ink);resize:vertical}
+@media (max-width:720px){
+  .hero,.day-layout{grid-template-columns:1fr}
+  .hero-card .big{font-size:42px}
+  .ti{grid-template-columns:78px 1fr auto}
+}
 /* 企画（ブロックエディタ） */
 .doc-bar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:12.5px;color:var(--muted)}
 .doc-bar .btn2{font-size:13px}
@@ -392,6 +438,7 @@ body.present .blk{grid-template-columns:0 minmax(0,1fr)}
 
 <nav class="tabs" id="tabs" role="tablist" aria-label="ページの切り替え">
   <button role="tab" data-tab="home" aria-selected="true">ホーム</button>
+  <button role="tab" data-tab="day" aria-selected="false">今日</button>
   <button role="tab" data-tab="plan" aria-selected="false">企画</button>
   <button role="tab" data-tab="calendar" aria-selected="false">カレンダー</button>
   <button role="tab" data-tab="gantt" aria-selected="false">工程表</button>
@@ -403,17 +450,11 @@ body.present .blk{grid-template-columns:0 minmax(0,1fr)}
 </nav>
 
 <div class="panel" data-panel="home">
-  <div class="stats">
-    <div class="stat"><b class="mono" id="sDays">–</b><span>卒業制作展 2/2 まで（日）</span></div>
-    <div class="stat"><b class="mono" id="sNext">–</b><span id="sNextLabel">次の締切まで（日）</span></div>
-    <div class="stat"><b class="mono" id="sClass">–</b><span>残りの授業日（木・金）</span></div>
-    <div class="stat"><b class="mono" id="sProg">–</b><span>タスク完了率</span><div class="bar"><i id="sBar"></i></div></div>
+  <div class="hero">
+    <div class="hero-card" id="homeToday"></div>
+    <div class="hero-card" id="homeNext"></div>
   </div>
   <div class="home-cols">
-    <div>
-      <div class="sec-head"><h2>締切までの日数</h2></div>
-      <div class="dl" id="deadlines"></div>
-    </div>
     <div>
       <div class="sec-head"><h2>2 週間以内のタスク</h2><button class="btn2" type="button" data-goto="tasks">やることリストへ</button></div>
       <div class="upcoming" id="upcoming"></div>
@@ -423,10 +464,53 @@ body.present .blk{grid-template-columns:0 minmax(0,1fr)}
       <div class="upcoming" id="homeEvents"></div>
     </div>
   </div>
+  <div class="home-cols">
+    <div>
+      <div class="sec-head"><h2>締切までの日数</h2></div>
+      <div class="dl" id="deadlines"></div>
+    </div>
+    <div>
+      <div class="sec-head"><h2>全体の進み具合</h2></div>
+      <div class="stats stats2">
+        <div class="stat"><b class="mono" id="sDays">–</b><span>卒業制作展 2/2 まで（日）</span></div>
+        <div class="stat"><b class="mono" id="sNext">–</b><span id="sNextLabel">次の締切まで（日）</span></div>
+        <div class="stat"><b class="mono" id="sClass">–</b><span>残りの授業日（木・金）</span></div>
+        <div class="stat"><b class="mono" id="sProg">–</b><span>タスク完了率</span><div class="bar"><i id="sBar"></i></div></div>
+      </div>
+    </div>
+  </div>
   <div style="display:grid;gap:8px">
     <div class="sec-head"><h2>掲示板</h2><button class="btn2" type="button" data-goto="board">すべて見る・投稿する</button></div>
     <div class="posts" id="homePosts"></div>
   </div>
+</div>
+
+<div class="panel" data-panel="day" hidden>
+<section>
+  <div class="sec-head"><h2 id="dayTitle">今日</h2>
+    <div class="cal-head"><button type="button" id="dayPrev" aria-label="前の日">‹</button><button type="button" id="dayToday">今日</button><button type="button" id="dayNext" aria-label="次の日">›</button><input type="date" id="dayPick" aria-label="日付を選ぶ" class="btn2"></div>
+  </div>
+  <div class="day-info" id="dayInfo"></div>
+  <div class="day-layout">
+    <div class="tt-wrap"><div class="tt" id="tt"></div></div>
+    <div class="day-side">
+      <form class="form" id="slotForm" autocomplete="off">
+        <b id="slotFormTitle" style="font-size:14px">時間割に追加</b>
+        <div class="form-row3" style="grid-template-columns:1fr 1fr 1fr">
+          <label>開始<input type="time" id="slStart" required step="900"></label>
+          <label>終了<input type="time" id="slEnd" required step="900"></label>
+          <label>担当<select id="slOwner"><option value="a">A</option><option value="b">B</option><option value="both">二人</option></select></label>
+        </div>
+        <input id="slTitle" placeholder="やること（例：リグの腕のウェイト調整）" maxlength="80">
+        <label style="display:grid;gap:3px;font-size:12px;color:var(--muted)">やることリストのタスクと結び付ける（任意）<select id="slTask"></select></label>
+        <textarea id="slNote" placeholder="メモ（任意）" maxlength="500"></textarea>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button type="submit" id="slSubmit">追加</button><button type="button" class="btn2" id="slCancel" hidden>やめる</button><button type="button" class="btn2" id="slDel" hidden>削除</button></div>
+        <p class="muted" style="margin:0;font-size:12px">時間割の空いているところを押すと、その時間と担当が入ります。</p>
+      </form>
+      <div class="box"><h4>この日のメモ・振り返り</h4><textarea id="dayNote" class="daynote" placeholder="進んだこと・困ったこと・次にやることなど" maxlength="3000"></textarea><span class="muted" id="dayNoteInfo" style="font-size:12px"></span></div>
+    </div>
+  </div>
+</section>
 </div>
 
 <div class="panel" data-panel="plan" hidden>
@@ -972,6 +1056,7 @@ function fail(err,msg){console.error(err);note(msg||'保存できませんでし
 
 /* ---------- ホーム ---------- */
 function renderHome(){
+  renderHomeHero();
   renderDeadlines();
   const done=tasks.filter(t=>t.status==='done').length;
   const pct=tasks.length?Math.round(done/tasks.length*100):0;
@@ -1670,7 +1755,154 @@ function onPlanSnap(s){
   planLoaded=true;renderDoc();seedPlanOnce();
 }
 
-function renderAll(){renderHome();renderCal();renderTasks();renderMats();renderPosts();renderDoc()}
+/* ---------- 今日（1 日の時間割） ---------- */
+// 1 コマ = sotsusei/board/slots の 1 ドキュメント {date, start, end, title, owner, taskId, note, done}
+const slotsCol=col('slots');
+const slotRef=id=>fsDoc(fbDb,'sotsusei','board','slots',id);
+const noteRef=key=>fsDoc(fbDb,'sotsusei','board','daynotes',key);
+let slots=[], dayNotes={}, dayKey=iso(today), editingSlot=null;
+const TT_FROM=9, TT_TO=23, HH=44; // 9:00〜23:00、1 時間 = 44px
+const toMin=s=>{const [h,m]=String(s||'0:0').split(':').map(Number);return h*60+(m||0)};
+const toHM=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+const ownerColor=o=>o==='a'?'maya':o==='b'?'md':'unity';
+const wd=key=>'日月火水木金土'[D(key).getDay()];
+// 時刻のある集まりは時間割の背景に塗る
+const sessTimes=s=>{const m=String(s.time).match(/^(\d{1,2}:\d{2})[–-](\d{1,2}:\d{2})$/);return m?[toMin(m[1]),toMin(m[2])]:null};
+
+function dayChips(key){
+  const ch=[];
+  sessionsOn(key).forEach(s=>ch.push('<span class="chip">'+(s.k==='meet'?'<i class="ic" style="--c:var(--accent)">集</i>':'<i class="ic" style="--c:var(--muted)">授</i>')+'<span class="t">'+s.label+' '+s.time+'（約 '+s.h+' 時間）</span></span>'));
+  MS.filter(m=>m[0]===key).forEach(m=>ch.push('<span class="chip"><i class="ic" style="--c:var(--high)">!</i><span class="t">'+m[1]+'</span></span>'));
+  TESTS.filter(t=>t[0]===key).forEach(t=>ch.push('<span class="chip">◆<span class="t">受け渡しテスト'+t[1]+'</span></span>'));
+  evOn(key).forEach(e=>ch.push('<span class="chip">'+(evIcon(e)?'<i class="ic" style="--c:'+evColor(e)+'">'+evIcon(e)+'</i>':'<i class="ph-mark" style="background:'+evColor(e)+'"></i>')+'<span class="t">'+esc(e.title)+'</span></span>'));
+  tasks.filter(t=>t.due===key&&t.status!=='done').forEach(t=>ch.push('<span class="chip"><i class="ph-mark" style="background:var(--'+phaseOf(t.phase).c+')"></i><span class="t">期限：'+esc(t.title)+'（'+esc(name(t.owner))+'）</span></span>'));
+  return ch;
+}
+function renderDay(){
+  const d=D(dayKey), isToday=dayKey===iso(today);
+  document.getElementById('dayTitle').textContent=(d.getMonth()+1)+'/'+d.getDate()+'（'+wd(dayKey)+'）'+(isToday?' 今日':'');
+  document.getElementById('dayPick').value=dayKey;
+  const ch=dayChips(dayKey);
+  document.getElementById('dayInfo').innerHTML=ch.length?ch.join(''):'<span class="muted" style="font-size:13px">授業・集まり・予定はありません。</span>';
+  // 時間割
+  const H=(TT_TO-TT_FROM)*HH, y=m=>(m-TT_FROM*60)/60*HH;
+  let h='<div class="tt-head"></div><div class="tt-head">'+esc(name('a'))+'</div><div class="tt-head">'+esc(name('b'))+'</div>';
+  h+='<div class="tt-times" style="height:'+H+'px">'+Array.from({length:TT_TO-TT_FROM},(_,i)=>i?'<span style="top:'+i*HH+'px">'+(TT_FROM+i)+':00</span>':'').join('')+'</div>';
+  const sess=sessionsOn(dayKey).map(s=>({s,t:sessTimes(s)})).filter(x=>x.t);
+  const daySlots=slots.filter(s=>s.date===dayKey);
+  ['a','b'].forEach(col=>{
+    h+='<div class="tt-col" data-col="'+col+'" style="height:'+H+'px;--hh:'+HH+'px">';
+    sess.forEach(({s,t})=>{h+='<div class="tt-sess" style="top:'+y(t[0])+'px;height:'+(y(t[1])-y(t[0]))+'px">'+(col==='b'?'<span>集合 '+s.time+'</span>':'')+'</div>'});
+    // 重なるコマは横に並べる
+    const list=daySlots.filter(s=>s.owner===col||s.owner==='both').sort((p,q)=>toMin(p.start)-toMin(q.start));
+    const lanes=[];
+    const placed=list.map(s=>{const a=toMin(s.start),b=Math.max(toMin(s.end),a+15);let L=lanes.findIndex(e=>e<=a);if(L<0){L=lanes.length;lanes.push(0)}lanes[L]=b;return {s,a,b,L}});
+    const n=Math.max(1,lanes.length);
+    placed.forEach(({s,a,b,L})=>{
+      const tk=s.taskId?tasks.find(t=>t.id===s.taskId):null;
+      h+='<button type="button" class="slot'+(s.done?' done':'')+(editingSlot===s.id?' editing':'')+'" data-slot="'+esc(s.id)+'" style="--c:var(--'+ownerColor(s.owner)+');top:'+(y(a)+1)+'px;height:'+Math.max(18,y(b)-y(a)-2)+'px;left:calc('+(L/n*100)+'% + 2px);width:calc('+(100/n)+'% - 4px)"><b>'+s.start+'–'+s.end+(s.owner==='both'?' ・二人':'')+'</b><span class="st2">'+esc(s.title||(tk?tk.title:''))+'</span><span class="chk2" data-done="1" role="checkbox" aria-checked="'+!!s.done+'" title="完了にする">'+(s.done?'✓':'')+'</span></button>';
+    });
+    h+='</div>';
+  });
+  if(isToday){const now=new Date(),m=now.getHours()*60+now.getMinutes();if(m>=TT_FROM*60&&m<=TT_TO*60)h+='<div class="tt-now" style="top:'+(y(m)+32)+'px"></div>'}
+  document.getElementById('tt').innerHTML=h;
+  // タスクの選択肢（未完了、期限順）
+  const sel=document.getElementById('slTask'),cur=sel.value;
+  sel.innerHTML='<option value="">結び付けない</option>'+tasks.filter(t=>t.status!=='done').sort((p,q)=>(p.due||'9')<(q.due||'9')?-1:1).map(t=>'<option value="'+esc(t.id)+'">'+(t.due?fmt(D(t.due))+' ':'')+esc(t.title)+'</option>').join('');
+  sel.value=cur;
+  const ta=document.getElementById('dayNote');
+  if(document.activeElement!==ta&&!noteTimer)ta.value=(dayNotes[dayKey]&&dayNotes[dayKey].text)||'';
+  const dn=dayNotes[dayKey];document.getElementById('dayNoteInfo').textContent=dn&&dn.updatedAt?'最終更新 '+fmtDT(dn.updatedAt)+(dn.by?'（'+dn.by+'）':''):'';
+}
+function resetSlotForm(start,owner){
+  editingSlot=null;
+  document.getElementById('slotFormTitle').textContent='時間割に追加';
+  document.getElementById('slSubmit').textContent='追加';
+  document.getElementById('slCancel').hidden=true;document.getElementById('slDel').hidden=true;
+  const s=start!=null?start:Math.max(TT_FROM*60,Math.min((TT_TO-1)*60,Math.ceil((new Date().getHours()*60+new Date().getMinutes())/30)*30));
+  document.getElementById('slStart').value=toHM(s);document.getElementById('slEnd').value=toHM(Math.min(TT_TO*60,s+60));
+  document.getElementById('slOwner').value=owner||'a';
+  ['slTitle','slNote'].forEach(i=>document.getElementById(i).value='');document.getElementById('slTask').value='';
+}
+function setDay(key){dayKey=key;if(editingSlot)resetSlotForm();renderDay()}
+document.getElementById('dayPrev').addEventListener('click',()=>{const d=D(dayKey);d.setDate(d.getDate()-1);setDay(iso(d))});
+document.getElementById('dayNext').addEventListener('click',()=>{const d=D(dayKey);d.setDate(d.getDate()+1);setDay(iso(d))});
+document.getElementById('dayToday').addEventListener('click',()=>setDay(iso(today)));
+document.getElementById('dayPick').addEventListener('change',e=>{if(e.target.value)setDay(e.target.value)});
+document.getElementById('tt').addEventListener('click',async e=>{
+  const sb=e.target.closest('[data-slot]');
+  if(sb){
+    const s=slots.find(x=>x.id===sb.dataset.slot);if(!s)return;
+    if(e.target.closest('[data-done]')){try{await fsUpdateDoc(slotRef(s.id),{done:!s.done,by:who(),updatedAt:Date.now()})}catch(err){fail(err)}return}
+    editingSlot=s.id;
+    document.getElementById('slotFormTitle').textContent='時間割を編集';
+    document.getElementById('slSubmit').textContent='保存';
+    document.getElementById('slCancel').hidden=false;const del=document.getElementById('slDel');del.hidden=false;del.textContent='削除';del.classList.remove('arm');
+    document.getElementById('slStart').value=s.start;document.getElementById('slEnd').value=s.end;document.getElementById('slOwner').value=s.owner||'a';
+    document.getElementById('slTitle').value=s.title||'';document.getElementById('slNote').value=s.note||'';document.getElementById('slTask').value=s.taskId||'';
+    renderDay();document.getElementById('slotForm').scrollIntoView({behavior:'smooth',block:'nearest'});
+    return;
+  }
+  const colEl=e.target.closest('.tt-col');if(!colEl)return;
+  const r=colEl.getBoundingClientRect();const m=TT_FROM*60+Math.floor((e.clientY-r.top)/HH*2)*30;
+  resetSlotForm(Math.max(TT_FROM*60,Math.min((TT_TO-1)*60,m)),colEl.dataset.col);renderDay();
+  document.getElementById('slTitle').focus();
+});
+document.getElementById('slStart').addEventListener('change',e=>{const en=document.getElementById('slEnd');if(toMin(en.value)<=toMin(e.target.value))en.value=toHM(Math.min(TT_TO*60,toMin(e.target.value)+60))});
+document.getElementById('slCancel').addEventListener('click',()=>{resetSlotForm();renderDay()});
+document.getElementById('slDel').addEventListener('click',async e=>{
+  const b=e.currentTarget;if(!editingSlot)return;
+  if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='本当に削除';setTimeout(()=>{b.classList.remove('arm');b.textContent='削除'},4000);return}
+  const id=editingSlot;resetSlotForm();try{await fsDeleteDoc(slotRef(id))}catch(err){fail(err)}
+});
+document.getElementById('slotForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const start=document.getElementById('slStart').value,end=document.getElementById('slEnd').value;
+  if(toMin(end)<=toMin(start)){const el=document.getElementById('slEnd');el.setCustomValidity('終了は開始より後にしてください');el.reportValidity();return}
+  const taskId=document.getElementById('slTask').value, tk=tasks.find(t=>t.id===taskId);
+  const title=document.getElementById('slTitle').value.trim()||(tk?tk.title:'');
+  if(!title){const el=document.getElementById('slTitle');el.setCustomValidity('やることを入力するか、タスクを選んでください');el.reportValidity();return}
+  const data={date:dayKey,start,end,title,owner:document.getElementById('slOwner').value,taskId,note:document.getElementById('slNote').value.trim(),by:who(),updatedAt:Date.now()};
+  try{
+    if(editingSlot)await fsUpdateDoc(slotRef(editingSlot),data);
+    else await fsAddDoc(slotsCol,Object.assign(data,{done:false,createdAt:Date.now()}));
+    resetSlotForm(toMin(end),data.owner);renderDay();
+  }catch(err){fail(err,'時間割を保存できませんでした。')}
+});
+['slEnd','slTitle'].forEach(i=>document.getElementById(i).addEventListener('input',e=>e.target.setCustomValidity('')));
+let noteTimer=null;
+document.getElementById('dayNote').addEventListener('input',e=>{
+  clearTimeout(noteTimer);const key=dayKey,text=e.target.value;
+  noteTimer=setTimeout(async()=>{noteTimer=null;try{await fsSetDoc(noteRef(key),{text,by:who(),updatedAt:Date.now()})}catch(err){fail(err,'メモを保存できませんでした。')}},800);
+});
+resetSlotForm();
+// 1 分ごとに「今」の線を動かす
+setInterval(()=>{if(!document.querySelector('[data-panel="day"]').hidden&&dayKey===iso(today))renderDay()},60000);
+
+/* ホーム最上段：今日やること と 一番近い締切 */
+function renderHomeHero(){
+  const key=iso(today), d=today;
+  const ch=sessionsOn(key).map(s=>'<span class="sess">'+(s.k==='meet'?'<i class="ic" style="--c:var(--accent)">集</i>':'<i class="ic" style="--c:var(--muted)">授</i>')+s.label+' '+s.time+'</span>');
+  const items=[];
+  slots.filter(s=>s.date===key).sort((p,q)=>toMin(p.start)-toMin(q.start)).forEach(s=>items.push('<div class="ti'+(s.done?' done':'')+'"><span class="mono">'+s.start+'–'+s.end+'</span><span>'+esc(s.title)+'</span><span class="muted" style="font-size:12.5px">'+(s.owner==='both'?'二人':esc(name(s.owner)))+'</span></div>'));
+  evOn(key).forEach(e=>items.push('<div class="ti"><span class="mono">予定</span><span>'+esc(e.title)+'</span><span></span></div>'));
+  tasks.filter(t=>t.due===key&&t.status!=='done').forEach(t=>items.push('<div class="ti"><span class="mono" style="color:var(--high)">今日まで</span><span>'+esc(t.title)+'</span><span class="muted" style="font-size:12.5px">'+esc(name(t.owner))+'</span></div>'));
+  const late=tasks.filter(t=>t.status!=='done'&&t.due&&t.due<key).length;
+  document.getElementById('homeToday').innerHTML='<span class="k">今日やること</span><h2>'+(d.getMonth()+1)+'/'+d.getDate()+'（'+wd(key)+'）</h2>'+(ch.length?'<div style="display:flex;flex-wrap:wrap;gap:6px">'+ch.join('')+'</div>':'')+
+    '<div class="today-list">'+(!loaded?'<div class="empty">読み込み中…</div>':items.length?items.join(''):'<div class="empty">今日の時間割はまだありません。「今日」のページで書き込めます。</div>')+'</div>'+
+    (late?'<div style="font-size:13px;color:var(--high);font-weight:700">期限を過ぎた未完了のタスクが '+late+' 件あります</div>':'')+
+    '<div class="foot"><button class="btn2" type="button" data-goto="day">今日の時間割を開く</button></div>';
+  const DL=[...MS].sort((a,b)=>a[0]<b[0]?-1:1).filter(m=>m[0]>=key);
+  const nx=DL[0], ns=DL.find(m=>m[2]==='s');
+  if(!nx){document.getElementById('homeNext').innerHTML='<span class="k">一番近い締切</span><p>残っている締切はありません。</p>';return}
+  const n=diff(D(nx[0]),today);
+  document.getElementById('homeNext').className='hero-card hero-next';
+  document.getElementById('homeNext').innerHTML='<span class="k">一番近い締切</span><h2>'+(nx[2]==='s'?'<span class="tag-s">学校</span>':'')+nx[1]+'</h2><div class="big">'+(n===0?'今日':n+'<small>日</small>')+'</div>'+
+    '<div class="muted" style="font-size:13.5px">'+fmt(D(nx[0]))+'（'+wd(nx[0])+'）'+(n>0?' ・ 作業できる時間 約 '+hoursUntil(nx[0])+' 時間':'')+'</div>'+
+    (ns&&ns!==nx?'<div style="font-size:13.5px;border-top:1px dashed var(--line);padding-top:8px">次の学校の節目：<b>'+ns[1]+'</b> '+fmt(D(ns[0]))+' ・ あと '+diff(D(ns[0]),today)+' 日</div>':'');
+}
+
+function renderAll(){renderHome();renderCal();renderTasks();renderMats();renderPosts();renderDoc();renderDay()}
 drawGantt();renderAll();
 
 // ログインが確認できたら購読を始める
@@ -1678,6 +1910,8 @@ window.startBoard=function(){
   if(unsubs.length)return;
   note('変更は二人の画面に自動で反映されます。');
   seedEventsOnce();
+  unsubs.push(fsOnSnapshot(slotsCol,s=>{slots=s.docs.map(d=>Object.assign({id:d.id},d.data()));renderDay();renderHomeHero()},err=>console.error(err)));
+  unsubs.push(fsOnSnapshot(col('daynotes'),s=>{dayNotes={};s.docs.forEach(d=>dayNotes[d.id]=d.data());renderDay()},err=>console.error(err)));
   unsubs.push(fsOnSnapshot(planCol,onPlanSnap,err=>{console.error(err);planLoaded=true;renderDoc()}));
   unsubs.push(fsOnSnapshot(eventsCol,s=>{events=s.docs.map(d=>Object.assign({id:d.id},d.data()));renderHome();renderCal()},err=>console.error(err)));
   let got=0;const ready=()=>{if(++got===3){loaded=true;renderAll()}};
@@ -1690,7 +1924,7 @@ window.startBoard=function(){
 };
 window.stopBoard=function(){
   unsubs.forEach(u=>u());unsubs=[];
-  tasks=[];materials=[];posts=[];events=[];blocks=[];planLoaded=false;planSeedChecked=false;els.clear();docEl.innerHTML="";loaded=false;renderAll();
+  tasks=[];materials=[];posts=[];events=[];slots=[];dayNotes={};blocks=[];planLoaded=false;planSeedChecked=false;els.clear();docEl.innerHTML="";loaded=false;renderAll();
 };
 if(currentUser&&allowed)window.startBoard();
 })();
