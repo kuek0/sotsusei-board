@@ -1193,7 +1193,7 @@ function dayItems(key,withSessions){
   if(!fromEvents())MS0.forEach(m=>{if(m[0]===key)ev.push({k:'ms',t:m[1]})});
   if(!fromEvents())TESTS0.forEach(t=>{if(t[0]===key)ev.push({k:'tst',t:'テスト'+t[1]})});
   if(withSessions)sessionsOn(key).forEach(s=>ev.push({k:s.k,t:(s.k==='cls'?'授業 ':s.label+' ')+s.time,h:s.h,label:s.label,note:s.note}));
-  else if(!boardFlags.eventsSeeded4)sessionsOn(key).filter(s=>s.k==='meet').forEach(s=>ev.push({k:'meet',t:s.time.split('–')[0]+'〜 '+s.label,h:s.h}));
+  else if(!boardFlags.eventsSeeded4)sessionsOn(key).filter(s=>s.k==='meet').forEach(s=>ev.push({k:'meet',t:s.label+' '+s.time.split('–')[0]+'〜',h:s.h}));
   tasks.filter(t=>t.due===key).sort((a,b)=>(a.order||0)-(b.order||0)).forEach(t=>ev.push({k:'task',t:t.title,c:phaseOf(t.phase).c,done:t.status==='done',owner:t.owner,status:t.status}));
   return ev;
 }
@@ -1209,7 +1209,7 @@ function renderWork(){
     (goals.length?'<h4 style="margin-top:14px">最重要の締切までに使える時間</h4><div class="dl">'+goals.map(m=>'<div class="dl-row"><span class="mono">'+fmt(D(m[0]))+'</span><span>'+m[1]+'</span><span><span class="left">約</span> <b>'+hoursUntil(m[0])+'</b><span class="left">時間</span></span></div>').join('')+'</div>':'')+
     '<p class="muted" style="margin:10px 0 0;font-size:12.5px">水・土の打ち合わせは、カレンダーに入っている打ち合わせの予定（時刻つき）から計算します。昼食・休憩の分を引いています。授業は実際には少し短くなる見込みです。</p>';
 }
-function bandLabel(e){const t=e.time?e.time+'〜 ':'';return esc(t+e.title)}
+function bandLabel(e){return esc(e.title+(e.time?' '+e.time+'〜':''))}
 function renderCal(){
   renderWork();
   const y=calMonth.getFullYear(),m=calMonth.getMonth();
