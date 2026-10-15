@@ -326,6 +326,10 @@ img{max-width:100%}
 .tt-col{position:relative;border-left:1px solid var(--line);cursor:copy;background-image:repeating-linear-gradient(to bottom,var(--line) 0 1px,transparent 1px var(--hh))}
 .tt-sess{position:absolute;left:0;right:0;background:color-mix(in srgb,var(--accent) 9%,transparent);border-top:1px dashed color-mix(in srgb,var(--accent) 50%,transparent);border-bottom:1px dashed color-mix(in srgb,var(--accent) 50%,transparent);pointer-events:none}
 .tt-sess span{position:absolute;top:2px;right:4px;font-size:10.5px;color:var(--accent);font-weight:700}
+.tt-sess.cls{background:color-mix(in srgb,var(--muted) 7%,transparent);border-color:color-mix(in srgb,var(--muted) 35%,transparent)}
+.tt-sess.cls span{color:var(--muted)}
+.tt-brk{position:absolute;left:0;right:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--muted) 22%,transparent) 0 3px,transparent 3px 7px)}
+.tt-brk span{position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--muted);font-weight:700;background:var(--surface);padding:0 3px;line-height:1.3}
 .slot{position:absolute;z-index:2;border-radius:4px;padding:3px 6px;font-size:12px;line-height:1.35;overflow:hidden;cursor:pointer;background:color-mix(in srgb,var(--c) 22%,var(--surface));box-shadow:inset 3px 0 0 var(--c);color:var(--ink);border:0;text-align:left;display:flex;flex-direction:column;gap:1px}
 .slot b{font-size:11px;font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700}
 .slot .st2{overflow:hidden;text-overflow:ellipsis}
@@ -887,11 +891,14 @@ const CLASSES=[...FRI.map(s=>({d:D(s),w:'金'})),...THU.map(d=>({d,w:'木'}))].s
 
 // 作業できる時間（1 人あたりの目安）。木・金は授業、水・土はメンバーで集まって作業と打ち合わせ
 const WORK={
-  thu:{label:'授業',time:'6時間',h:6,note:'卒制以外の時間もあるので実際は少し短め'},
-  fri:{label:'授業',time:'9時間',h:9,note:'卒制以外の時間もあるので実際は少し短め'},
+  thu:{label:'授業（1〜4限）',time:'9:00–16:00',h:6,note:'休憩を除いて 6 時間。卒制以外の時間もあるので実際は少し短め'},
+  fri:{label:'授業（1〜6限）',time:'9:00–19:30',h:9,note:'休憩を除いて 9 時間。卒制以外の時間もあるので実際は少し短め'},
   wed:{label:'集まって作業・打ち合わせ',time:'11:30–16:00',h:3.5,note:'昼食込み（作業は約 3.5 時間）'},
   sat:{label:'集まって作業・打ち合わせ',time:'11:30–20:00',h:7,note:'昼食・休憩込み（作業は約 7 時間）'}
 };
+// 授業日の時間割（1 コマ 90 分）と休憩。今日タブの時間割に毎回自動で表示する
+const PERIODS=[['9:00','10:30'],['10:40','12:10'],['12:50','14:20'],['14:30','16:00'],['16:20','17:50'],['18:00','19:30']];
+const BREAKS=[['10:30','10:40','休憩'],['12:10','12:50','昼休み'],['14:20','14:30','休憩'],['16:00','16:20','休憩'],['17:50','18:00','休憩']];
 // 水・土の集まりの期間。年末年始は仮に休みにしている。「休み」の予定を入れた日も除く
 const MEET_FROM='2026-10-17', MEET_TO='2027-01-27', MEET_SKIP=['2026-12-30','2027-01-02'];
 const isoK=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -1792,7 +1799,14 @@ function renderDay(){
   const daySlots=slots.filter(s=>s.date===dayKey);
   ['a','b'].forEach(col=>{
     h+='<div class="tt-col" data-col="'+col+'" style="height:'+H+'px;--hh:'+HH+'px">';
-    sess.forEach(({s,t})=>{h+='<div class="tt-sess" style="top:'+y(t[0])+'px;height:'+(y(t[1])-y(t[0]))+'px">'+(col==='b'?'<span>集合 '+s.time+'</span>':'')+'</div>'});
+    sess.forEach(({s,t})=>{
+      const band=(a,b,cls,label)=>'<div class="'+cls+'" style="top:'+y(a)+'px;height:'+(y(b)-y(a))+'px">'+(label?'<span>'+label+'</span>':'')+'</div>';
+      if(s.k==='cls'){
+        // 授業日：時限と休憩を自動で表示（毎回書き込まなくてよい）
+        PERIODS.forEach(([a,b],i)=>{const A=toMin(a),B=toMin(b);if(A>=t[0]&&B<=t[1])h+=band(A,B,'tt-sess cls',col==='b'?(i+1)+'限':'')});
+        BREAKS.forEach(([a,b,l])=>{const A=toMin(a),B=toMin(b);if(A>=t[0]&&B<=t[1])h+=band(A,B,'tt-brk',col==='a'?l:'')});
+      }else h+=band(t[0],t[1],'tt-sess',col==='b'?'集合 '+s.time:'');
+    });
     // 重なるコマは横に並べる
     const list=daySlots.filter(s=>s.owner===col||s.owner==='both').sort((p,q)=>toMin(p.start)-toMin(q.start));
     const lanes=[];
