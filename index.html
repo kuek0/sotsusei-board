@@ -267,6 +267,13 @@ img{max-width:100%}
 .qp-colors .sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--ink)}
 .qpop textarea{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:6px 8px;font:inherit;font-size:13px;color:var(--ink);resize:vertical;width:100%}
 .qp-sch{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--high);font-weight:700}.qp-sch input{width:15px;height:15px;margin:0;accent-color:var(--high)}
+.qp-tpl{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:12px;padding-bottom:8px;border-bottom:1px dashed var(--line)}
+.qp-tpl .tpl{display:inline-flex;align-items:stretch;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.qp-tpl .tpl button{border:0;background:var(--surface);padding:3px 8px;font-size:12px;color:var(--ink);display:inline-flex;gap:5px;align-items:center}
+.qp-tpl .tpl button.x{padding:3px 7px;color:var(--muted);border-left:1px solid var(--line)}
+.qp-tpl .tpl button.x.arm{color:var(--high);font-weight:700}
+.qp-sub{flex-wrap:wrap;gap:4px 10px}
+.qp-acts .qp-multi,.qp-acts .qp-tplsave{border:0;background:none;color:var(--accent);font-size:12.5px;padding:4px}
 .qp-acts{display:flex;gap:8px;align-items:center}
 .qp-acts .sp{flex:1}
 .qp-acts .qp-save{border:0;background:var(--accent);color:var(--surface);border-radius:4px;padding:6px 16px;font-weight:700}
@@ -1249,7 +1256,8 @@ function renderCalDay(){
 const pop=document.createElement('div');pop.className='qpop';pop.hidden=true;pop.setAttribute('role','dialog');pop.setAttribute('aria-label','予定');
 document.body.appendChild(pop);
 const QP_COLORS=['','maya','md','zb','unity','out','high'];
-let qp=null, qpArm=false, copyMode=null;
+let qp=null, qpArm=false, copyMode=null, templates=[], tplArm=null;
+const tplCol=col('evtpl');
 // 日付を選ぶだけのときはカレンダーを作り直さない（作り直すとダブルクリックが途切れるため）
 function selectDay(key){
   calSel=key;
@@ -1265,14 +1273,16 @@ function paintRange(){
 function closePop(){if(!qp)return;qp=null;pop.hidden=true;paintRange()}
 function drawPop(){
   const isEdit=!!qp.id;
-  pop.innerHTML='<input id="qpTitle" placeholder="予定を入力" maxlength="80" value="'+esc(qp.title)+'">'+
+  pop.innerHTML=(templates.length?'<div class="qp-tpl"><span class="muted">テンプレ</span>'+templates.map(t=>'<span class="tpl"><button type="button" data-tpl="'+esc(t.id)+'" title="'+esc((t.time?t.time+(t.endTime?'–'+t.endTime:'')+' ':'')+t.title)+'"><i class="ic" style="--c:'+evColor(t)+'"></i>'+esc(t.title)+(t.time?' <small>'+t.time+'〜</small>':'')+'</button><button type="button" class="x'+(tplArm===t.id?' arm':'')+'" data-tpldel="'+esc(t.id)+'" aria-label="テンプレを削除">'+(tplArm===t.id?'削除':'×')+'</button></span>').join('')+'</div>':'')+
+    '<input id="qpTitle" placeholder="予定を入力" maxlength="80" value="'+esc(qp.title)+'">'+
     '<div class="qp-row"><input type="date" id="qpStart" value="'+qp.start+'" aria-label="開始日"><span>〜</span><input type="date" id="qpEnd" value="'+qp.end+'" aria-label="終了日"></div>'+
     '<div class="qp-row"><input type="time" id="qpTime" value="'+(qp.time||'')+'" step="300" aria-label="開始時刻"><span>〜</span><input type="time" id="qpEndTime" value="'+(qp.endTime||'')+'" step="300" aria-label="終了時刻"><span class="muted" style="font-size:11.5px;white-space:nowrap">時刻は任意</span></div>'+
     '<div class="qp-types">'+Object.entries(EVT).map(([k,v])=>'<button type="button" data-type="'+k+'" aria-pressed="'+(qp.type===k)+'"><i class="ic" style="--c:var(--'+v.c+')"></i>'+v.label+'</button>').join('')+'</div>'+
     '<div class="qp-types qp-imp"><span class="muted" style="font-size:12px;align-self:center">重要度</span>'+Object.entries(IMP).map(([k,v])=>'<button type="button" data-imp="'+k+'" aria-pressed="'+((qp.imp||'')===k)+'">'+v+'</button>').join('')+'</div>'+
     '<div class="qp-colors"><span class="muted">色</span>'+QP_COLORS.map(c=>'<button type="button" class="sw'+(c?'':' auto')+'" data-color="'+c+'" aria-pressed="'+((qp.color||'')===c)+'" title="'+(c?c:'種類に合わせる')+'" style="--c:var(--'+(c||(EVT[qp.type]||EVT.other).c)+')">'+(c?'':'自')+'</button>').join('')+'</div>'+
     '<textarea id="qpNote" rows="2" placeholder="メモ（任意）" maxlength="500">'+esc(qp.note)+'</textarea>'+
-    '<div class="qp-acts">'+(isEdit?'<button type="button" class="qp-del'+(qpArm?' arm':'')+'">'+(qpArm?'本当に削除':'削除')+'</button><button type="button" class="qp-copy">他の日にコピー</button>':'')+'<span class="sp"></span><button type="button" class="btn2 qp-cancel">閉じる</button><button type="button" class="qp-save">'+(isEdit?'保存':'追加')+'</button></div>';
+    '<div class="qp-acts qp-sub">'+(isEdit?'<button type="button" class="qp-del'+(qpArm?' arm':'')+'">'+(qpArm?'本当に削除':'削除')+'</button><button type="button" class="qp-copy">他の日にコピー（複数可）</button>':'<button type="button" class="qp-multi">複数の日に追加</button>')+'<button type="button" class="qp-tplsave">テンプレに保存</button><span class="muted" id="qpMsg" style="font-size:11.5px"></span></div>'+
+    '<div class="qp-acts"><span class="sp"></span><button type="button" class="btn2 qp-cancel">閉じる</button><button type="button" class="qp-save">'+(isEdit?'保存':'追加')+'</button></div>';
 }
 function openPop(rect,data){
   qp=Object.assign({id:null,title:'',type:'meeting',color:'',note:'',imp:'',time:'',endTime:''},data);qpArm=false;
@@ -1307,7 +1317,7 @@ function renderCopyBar(){
   const bar=document.getElementById('copyBar');
   if(!copyMode){bar.hidden=true;return}
   bar.hidden=false;
-  bar.innerHTML='<span>「'+esc(copyMode.src.title)+'」をコピーする日付を押してください（'+copyMode.days.size+' 日選択中）</span><span class="sp"></span><button type="button" class="btn2" data-cp="cancel">やめる</button><button type="button" class="cp-go" data-cp="go"'+(copyMode.days.size?'':' disabled')+'>'+copyMode.days.size+' 日にコピー</button>';
+  bar.innerHTML='<span>「'+esc(copyMode.src.title)+'」を入れる日付を押してください。何日でも選べます（'+copyMode.days.size+' 日選択中）</span><span class="sp"></span><button type="button" class="btn2" data-cp="cancel">やめる</button><button type="button" class="cp-go" data-cp="go"'+(copyMode.days.size?'':' disabled')+'>'+copyMode.days.size+' 日に追加</button>';
 }
 document.getElementById('copyBar').addEventListener('click',async e=>{
   const b=e.target.closest('[data-cp]');if(!b||!copyMode)return;
@@ -1328,6 +1338,18 @@ pop.addEventListener('click',async e=>{
   if(b.classList.contains('qp-cancel'))return closePop();
   if(b.classList.contains('qp-save'))return savePop();
   if(b.classList.contains('qp-copy')){readPop();return startCopy(Object.assign({},qp))}
+  // テンプレ：押すと中身を入れる。×は 2 回押しで削除
+  if(b.dataset.tpl){const t=templates.find(x=>x.id===b.dataset.tpl);if(t){readPop();Object.assign(qp,{title:t.title||'',type:EVT[t.type]?t.type:'other',color:t.color||'',time:t.time||'',endTime:t.endTime||'',imp:t.imp||'',note:t.note||''});tplArm=null;drawPop()}return}
+  if(b.dataset.tpldel){readPop();if(tplArm!==b.dataset.tpldel){tplArm=b.dataset.tpldel;drawPop();return}const id=tplArm;tplArm=null;try{await fsDeleteDoc(fsDoc(fbDb,'sotsusei','board','evtpl',id))}catch(err){fail(err)}return}
+  if(b.classList.contains('qp-tplsave')){
+    readPop();if(!qp.title.trim()){const t=document.getElementById('qpTitle');t.focus();t.placeholder='テンプレの名前（予定の名前）を入れてください';return}
+    try{await fsAddDoc(tplCol,{title:qp.title.trim(),type:qp.type,color:qp.color||'',time:qp.time||'',endTime:qp.endTime||'',imp:qp.imp||'',note:(qp.note||'').trim(),by:who(),createdAt:Date.now()});const m=document.getElementById('qpMsg');if(m)m.textContent='テンプレに保存しました'}catch(err){fail(err,'テンプレを保存できませんでした。')}
+    return;
+  }
+  if(b.classList.contains('qp-multi')){
+    readPop();if(!qp.title.trim()){const t=document.getElementById('qpTitle');t.focus();t.placeholder='予定の名前を入れてください';return}
+    const src=Object.assign({},qp,{id:null}),first=qp.start;startCopy(src);copyMode.days.add(first);renderCal();return;
+  }
   if(b.classList.contains('qp-del')){
     if(!qpArm){readPop();qpArm=true;drawPop();return}
     const id=qp.id;closePop();try{await fsDeleteDoc(fsDoc(fbDb,'sotsusei','board','events',id))}catch(err){fail(err)}
@@ -2218,6 +2240,7 @@ window.startBoard=function(){
   unsubs.push(fsOnSnapshot(slotsCol,s=>{slots=s.docs.map(d=>Object.assign({id:d.id},d.data()));renderDay();renderHomeHero()},err=>console.error(err)));
   unsubs.push(fsOnSnapshot(col('daynotes'),s=>{dayNotes={};s.docs.forEach(d=>dayNotes[d.id]=d.data());renderDay()},err=>console.error(err)));
   unsubs.push(fsOnSnapshot(planCol,onPlanSnap,err=>{console.error(err);planLoaded=true;renderDoc()}));
+  unsubs.push(fsOnSnapshot(tplCol,s=>{templates=s.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));if(qp){readPop();drawPop()}},err=>console.error(err)));
   unsubs.push(fsOnSnapshot(eventsCol,s=>{events=s.docs.map(d=>Object.assign({id:d.id},d.data()));drawGantt();renderHome();renderCal();renderDay()},err=>console.error(err)));
   let got=0;const ready=()=>{if(++got===3){loaded=true;renderAll()}};
   let r1=false,r2=false,r3=false;
