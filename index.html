@@ -281,6 +281,10 @@ img{max-width:100%}
 .qp-dows button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
 .qp-scope{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--accent);font-weight:700}
 .qp-scope input{width:15px;height:15px;margin:0}
+.band.picked{outline:2px solid var(--high);outline-offset:-1px;background:color-mix(in srgb,var(--high) 22%,var(--surface))}
+.delbar{border-color:var(--high)}
+.delbar .del-go{background:var(--high)}
+.delbar .del-go.arm{box-shadow:0 0 0 3px color-mix(in srgb,var(--high) 30%,transparent)}
 .qp-acts{display:flex;gap:8px;align-items:center}
 .qp-acts .sp{flex:1}
 .qp-acts .qp-save{border:0;background:var(--accent);color:var(--surface);border-radius:4px;padding:6px 16px;font-weight:700}
@@ -597,10 +601,11 @@ body.present .blk{grid-template-columns:0 minmax(0,1fr)}
 <div class="panel" data-panel="calendar" hidden>
   <section>
     <div class="sec-head"><h2>カレンダー</h2>
-      <div class="cal-head"><button type="button" id="calPrev" aria-label="前の月">‹</button><b id="calTitle"></b><button type="button" id="calNext" aria-label="次の月">›</button><button type="button" id="calToday">今月</button><button type="button" id="calAdd" class="add-ev">＋ 予定</button></div>
+      <div class="cal-head"><button type="button" id="calPrev" aria-label="前の月">‹</button><b id="calTitle"></b><button type="button" id="calNext" aria-label="次の月">›</button><button type="button" id="calToday">今月</button><button type="button" id="calAdd" class="add-ev">＋ 予定</button><button type="button" id="calBulk">まとめて削除</button></div>
     </div>
     <p class="muted" style="margin:0;font-size:12.5px">日付をダブルクリックで予定を追加、ドラッグで複数日にまとめて追加できます。予定を押すと編集・削除・他の日へのコピーができます。</p>
     <div class="copybar" id="copyBar" hidden></div>
+    <div class="copybar delbar" id="delBar" hidden></div>
     <div class="cal" id="cal"></div>
     <div class="ev-types" id="evTypes"></div>
     <div class="cal-day" id="calDay"></div>
@@ -1235,7 +1240,7 @@ function renderCal(){
     placed.forEach(p=>{
       if(p.pseudo){h+='<div class="band cls" style="grid-row:'+(p.L+2)+';grid-column:'+(p.s+1)+' / '+(p.en+2)+';--c:var(--muted)"><i class="ic"></i><span class="t">'+p.title+'</span></div>';return}
       const e=p.e,ic=evIcon(e),imp=impOf(e);
-      h+='<button type="button" class="band'+(e.type==='holiday'?' holiday':'')+(p.cl?' cl':'')+(p.cr?' cr':'')+(imp?' imp-'+imp:'')+'" data-ev="'+esc(e.id)+'" style="grid-row:'+(p.L+2)+';grid-column:'+(p.s+1)+' / '+(p.en+2)+';--c:'+evColor(e)+'" title="'+esc((evTime(e)?evTime(e)+' ':'')+e.title)+'">'+(ic&&!p.cl?'<i class="ic"></i>':'')+'<span class="t">'+bandLabel(e)+'</span></button>'});
+      h+='<button type="button" class="band'+(e.type==='holiday'?' holiday':'')+(p.cl?' cl':'')+(p.cr?' cr':'')+(imp?' imp-'+imp:'')+(delMode&&delMode.ids.has(e.id)?' picked':'')+'" data-ev="'+esc(e.id)+'" style="grid-row:'+(p.L+2)+';grid-column:'+(p.s+1)+' / '+(p.en+2)+';--c:'+evColor(e)+'" title="'+esc((evTime(e)?evTime(e)+' ':'')+e.title)+'">'+(ic&&!p.cl?'<i class="ic"></i>':'')+'<span class="t">'+bandLabel(e)+'</span></button>'});
     keys.forEach((key,i)=>{
       const it=dayItems(key,false);const shown=it.slice(0,maxItems);
       if(!it.length)return;
@@ -1247,7 +1252,7 @@ function renderCal(){
     h+='</div>';
   }
   document.getElementById('cal').innerHTML=h;
-  renderCalDay();paintRange();renderCopyBar();
+  renderCalDay();paintRange();renderCopyBar();renderDelBar();
 }
 const impTag=l=>l==='high'?'<span class="tag-s">最重要</span>':l==='mid'?'<span class="tag-s mid">重要</span>':'';
 function renderCalDay(){
@@ -1360,6 +1365,34 @@ async function writeChunks(ops){
 }
 // 他の日へのコピー：コピー元を覚えて、カレンダーで日付を選ぶ
 function startCopy(src){copyMode={src,days:new Set()};closePop();renderCal();document.getElementById('copyBar').scrollIntoView({behavior:'smooth',block:'nearest'})}
+// まとめて削除：予定を押して選び、まとめて消す
+let delMode=null;
+function renderDelBar(){
+  const bar=document.getElementById('delBar');
+  if(!delMode){bar.hidden=true;return}
+  bar.hidden=false;
+  const n=delMode.ids.size, last=delMode.last&&events.find(e=>e.id===delMode.last);
+  bar.innerHTML='<span>消したい予定を押して選んでください（<b>'+n+'</b> 件選択中）</span>'+
+    '<button type="button" class="btn2" data-dm="month">この月の予定をすべて選ぶ</button>'+
+    (last?'<button type="button" class="btn2" data-dm="same">「'+esc(last.title)+'」をすべて選ぶ</button>':'')+
+    (n?'<button type="button" class="btn2" data-dm="clear">選択を解除</button>':'')+
+    '<span class="sp"></span><button type="button" class="btn2" data-dm="cancel">やめる</button>'+
+    '<button type="button" class="cp-go del-go'+(delMode.arm?' arm':'')+'" data-dm="go"'+(n?'':' disabled')+'>'+(delMode.arm?'本当に '+n+' 件を削除':n+' 件を削除')+'</button>';
+}
+document.getElementById('calBulk').addEventListener('click',()=>{closePop();copyMode=null;delMode=delMode?null:{ids:new Set(),last:null,arm:false};renderCal()});
+document.getElementById('delBar').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-dm]');if(!b||!delMode)return;
+  const k=b.dataset.dm;
+  if(k==='cancel'){delMode=null;renderCal();return}
+  if(k==='clear'){delMode.ids.clear();delMode.arm=false;renderCal();return}
+  if(k==='month'){const y=calMonth.getFullYear(),m=calMonth.getMonth(),a=iso(new Date(y,m,1)),z=iso(new Date(y,m+1,0));events.filter(x=>x.start<=z&&(x.end||x.start)>=a).forEach(x=>delMode.ids.add(x.id));delMode.arm=false;renderCal();return}
+  if(k==='same'){const t=events.find(x=>x.id===delMode.last);if(t)events.filter(x=>x.title===t.title).forEach(x=>delMode.ids.add(x.id));delMode.arm=false;renderCal();return}
+  if(k==='go'){
+    if(!delMode.arm){delMode.arm=true;renderDelBar();return}
+    const ids=[...delMode.ids];delMode=null;renderCal();
+    try{await writeChunks(ids.map(id=>['delete',id]))}catch(err){fail(err,'まとめて削除できませんでした。')}
+  }
+});
 function renderCopyBar(){
   const bar=document.getElementById('copyBar');
   if(!copyMode){bar.hidden=true;return}
@@ -1413,13 +1446,13 @@ pop.addEventListener('change',e=>{
   if(['qpFreq','qpUntil','qpScope','qpStart'].includes(e.target.id)){readPop();drawPop()}
 });
 document.addEventListener('mousedown',e=>{if(qp&&!pop.contains(e.target)&&!e.target.closest('#cal [data-ev],#calDay [data-ev],#calAdd'))closePop()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&copyMode){copyMode=null;renderCal()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(copyMode||delMode)){copyMode=null;delMode=null;renderCal()}});
 
 // 押す → その日を選ぶ。ダブルクリック → その日に追加。ドラッグ → 複数日にまとめて追加
 let drag=null;
 const calEl=document.getElementById('cal');
 calEl.addEventListener('mousedown',e=>{
-  if(e.button!==0||e.target.closest('[data-ev]')||copyMode)return;
+  if(e.button!==0||e.target.closest('[data-ev]')||copyMode||delMode)return;
   const c=e.target.closest('[data-day]');if(!c)return;
   drag={a:c.dataset.day,b:c.dataset.day};
 });
@@ -1434,13 +1467,14 @@ document.addEventListener('mouseup',()=>{
 });
 calEl.addEventListener('click',e=>{
   const band=e.target.closest('[data-ev]');
+  if(band&&delMode){const id=band.dataset.ev;delMode.ids.has(id)?delMode.ids.delete(id):delMode.ids.add(id);delMode.last=id;delMode.arm=false;renderCal();return}
   if(band&&!copyMode){const ev=events.find(x=>x.id===band.dataset.ev);if(ev)openPop(band.getBoundingClientRect(),evData(ev));return}
   const c=e.target.closest('[data-day]');if(!c)return;
   if(copyMode){const k=c.dataset.day;copyMode.days.has(k)?copyMode.days.delete(k):copyMode.days.add(k);renderCal();return}
   if(!qp)selectDay(c.dataset.day);
 });
 calEl.addEventListener('dblclick',e=>{
-  if(copyMode||e.target.closest('[data-ev]'))return;
+  if(copyMode||delMode||e.target.closest('[data-ev]'))return;
   const c=e.target.closest('[data-day]');if(!c)return;
   const k=c.dataset.day;selectDay(k);
   const cell=calEl.querySelector('[data-day="'+k+'"]');
