@@ -369,6 +369,34 @@ img{max-width:100%}
   .hero-card .big{font-size:42px}
   .ti{grid-template-columns:78px 1fr auto}
 }
+/* 進捗 */
+.pr-who{font-size:13.5px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.pr-pick{justify-self:start;cursor:pointer;display:inline-grid;place-items:center}
+.drop{border:1.5px dashed var(--line);border-radius:6px;padding:14px;text-align:center;font-size:12.5px;color:var(--muted);background:var(--surface)}
+.drop.over{border-color:var(--accent);color:var(--accent)}
+.pr-prev{display:flex;flex-wrap:wrap;gap:8px}
+.pr-prev figure{margin:0;position:relative;width:96px;height:96px;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:var(--soft)}
+.pr-prev img{width:100%;height:100%;object-fit:cover}
+.pr-prev button{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);font-size:13px;line-height:1;padding:0}
+.pr-prev .busy{display:grid;place-items:center;font-size:11px;color:var(--muted)}
+.prs{display:grid;gap:12px}
+.pr{display:grid;gap:8px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:8px;min-width:0}
+.pr-h{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:12.5px;color:var(--muted)}
+.pr-h b{font-size:14.5px;color:var(--ink)}
+.pr-h .ph{display:inline-flex;gap:5px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:0 8px;font-size:11.5px;color:var(--ink)}
+.pr-h .acts{margin-left:auto}
+.pr-h .acts button{border:0;background:none;color:var(--muted);font-size:12px;padding:2px 4px}
+.pr-h .acts button.arm{color:var(--high);font-weight:700}
+.pr p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14.5px}
+.pr-imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px}
+.pr-imgs button{border:0;padding:0;border-radius:6px;overflow:hidden;aspect-ratio:4/3;background:var(--soft);cursor:zoom-in}
+.pr-imgs img{width:100%;height:100%;object-fit:cover;display:block}
+.pr-day{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin-top:6px}
+.mat-wrap summary{cursor:pointer;font-size:14px}
+.lightbox{position:fixed;inset:0;z-index:80;background:color-mix(in srgb,#000 82%,transparent);display:grid;place-items:center;padding:16px}
+.lightbox img{max-width:100%;max-height:calc(100vh - 32px);border-radius:4px}
+.lightbox .lb-close{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:0;background:#fff;color:#111;font-size:20px}
+.lightbox span{position:absolute;bottom:16px;left:0;right:0;text-align:center;color:#fff;font-size:13px}
 /* 企画（ブロックエディタ） */
 .doc-bar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:12.5px;color:var(--muted)}
 .doc-bar .btn2{font-size:13px}
@@ -471,7 +499,7 @@ body.present .blk{grid-template-columns:0 minmax(0,1fr)}
   <button role="tab" data-tab="gantt" aria-selected="false">工程表</button>
   <button role="tab" data-tab="tasks" aria-selected="false">やることリスト</button>
   <button role="tab" data-tab="flow" aria-selected="false">制作フロー</button>
-  <button role="tab" data-tab="materials" aria-selected="false">資料</button>
+  <button role="tab" data-tab="progress" aria-selected="false">進捗</button>
   <button role="tab" data-tab="plan" aria-selected="false">企画</button>
   <button role="tab" data-tab="board" aria-selected="false">掲示板</button>
   <button role="tab" data-tab="decisions" aria-selected="false">決定事項</button>
@@ -693,23 +721,42 @@ body.present .blk{grid-template-columns:0 minmax(0,1fr)}
 </section>
 </div>
 
-<div class="panel" data-panel="materials" hidden>
+<div class="panel" data-panel="progress" hidden>
 <section>
-  <div class="sec-head"><h2>資料</h2><span class="muted" style="font-size:13px">ファイルは Google ドライブなどに置き、ここにリンクを登録します</span></div>
-  <form class="form" id="matForm" autocomplete="off">
+  <div class="sec-head"><h2>進捗</h2><span class="muted" style="font-size:13px">画像とひとことで、進み具合を提出・共有します</span></div>
+  <form class="form" id="prForm" autocomplete="off">
+    <div class="pr-who">提出者：<b id="prWho">–</b><span class="muted" id="prNow"></span></div>
+    <textarea id="prText" placeholder="ひとこと（例：衣装案 B の袖を MD で試した。布が重く見えるので生地を薄くしたい）" required maxlength="500"></textarea>
     <div class="form-row">
-      <input id="mtTitle" placeholder="資料名（例：衣装デザイン案 v2）" required maxlength="80">
-      <select id="mtCat" aria-label="分類">
-        <option>キャラデザイン</option><option>衣装デザイン</option><option>三面図・設定画</option><option>参考資料</option><option>先生・授業の資料</option><option>その他</option>
-      </select>
+      <select id="prPhase" aria-label="工程"><option value="">工程（任意）</option></select>
+      <label class="btn2 pr-pick" for="prFiles">画像を選ぶ</label>
     </div>
-    <input id="mtUrl" type="url" placeholder="リンク（https:// から始まる URL）" required maxlength="500">
-    <textarea id="mtNote" placeholder="メモ（任意）" maxlength="500"></textarea>
-    <button type="submit">登録</button>
+    <input type="file" id="prFiles" accept="image/*" multiple hidden>
+    <div class="drop" id="prDrop">ここに画像をドラッグ、またはコピーした画像を貼り付け（4 枚まで）</div>
+    <div class="pr-prev" id="prPrev"></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="submit" id="prSubmit">提出</button><span class="muted" id="prMsg" style="font-size:12.5px"></span></div>
   </form>
-  <div class="mats" id="mats"></div>
+  <div class="prs" id="prs"></div>
+</section>
+<section>
+  <details class="mat-wrap">
+    <summary><b>資料リンク</b> <span class="muted" style="font-size:12.5px">Google ドライブなどのリンクを登録</span></summary>
+    <form class="form" id="matForm" autocomplete="off" style="margin-top:10px">
+      <div class="form-row">
+        <input id="mtTitle" placeholder="資料名（例：衣装デザイン案 v2）" required maxlength="80">
+        <select id="mtCat" aria-label="分類">
+          <option>キャラデザイン</option><option>衣装デザイン</option><option>三面図・設定画</option><option>参考資料</option><option>先生・授業の資料</option><option>その他</option>
+        </select>
+      </div>
+      <input id="mtUrl" type="url" placeholder="リンク（https:// から始まる URL）" required maxlength="500">
+      <textarea id="mtNote" placeholder="メモ（任意）" maxlength="500"></textarea>
+      <button type="submit">登録</button>
+    </form>
+    <div class="mats" id="mats" style="margin-top:12px"></div>
+  </details>
 </section>
 </div>
+<div class="lightbox" id="lightbox" hidden><img alt="" id="lbImg"><button type="button" class="lb-close" aria-label="閉じる">×</button><span id="lbMsg"></span></div>
 
 <div class="panel" data-panel="board" hidden>
 <section>
@@ -1457,6 +1504,106 @@ document.getElementById('matForm').addEventListener('submit',async e=>{
 });
 document.getElementById('mtUrl').addEventListener('input',e=>e.target.setCustomValidity(''));
 
+/* ---------- 進捗（画像とひとことで提出） ---------- */
+// 画像はブラウザで縮小して Firestore に保存（Storage は有料プランが必要なため）
+// 一覧用の小さい画像は progress の各ドキュメントに、拡大用の画像は progressImg に 1 枚ずつ保存する
+const progCol=col('progress');
+const progImgRef=id=>fsDoc(fbDb,'sotsusei','board','progressImg',id);
+let progress=[], prPending=[], prBusy=0;
+const PR_MAX=4;
+document.getElementById('prPhase').innerHTML='<option value="">工程（任意）</option>'+PHASES.map(p=>'<option value="'+p.id+'">'+p.name+'</option>').join('');
+function loadImg(file){return new Promise((ok,ng)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{ok(im);URL.revokeObjectURL(u)};im.onerror=()=>{ng(new Error('画像を読み込めませんでした'));URL.revokeObjectURL(u)};im.src=u})}
+function jpeg(im,max,q){
+  const s=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight)),c=document.createElement('canvas');
+  c.width=Math.round(im.naturalWidth*s);c.height=Math.round(im.naturalHeight*s);
+  const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);
+  return c.toDataURL('image/jpeg',q);
+}
+async function shrink(file){
+  const im=await loadImg(file);
+  let max=1800,q=.85,full=jpeg(im,max,q);
+  // 1 ドキュメント 1MB の上限に収まるまで縮める
+  while(full.length>900000&&(q>.5||max>900)){if(q>.5)q-=.1;else max-=300;full=jpeg(im,max,q)}
+  return {thumb:jpeg(im,420,.72),full};
+}
+async function addFiles(files){
+  const imgs=[...files].filter(f=>f.type.startsWith('image/'));
+  const room=PR_MAX-prPending.length-prBusy;
+  if(!imgs.length)return;
+  if(imgs.length>room)prMsg('画像は 1 回に '+PR_MAX+' 枚までです。');
+  for(const f of imgs.slice(0,Math.max(0,room))){
+    prBusy++;renderPrPrev();
+    try{prPending.push(await shrink(f))}catch(err){prMsg(err.message)}
+    prBusy--;renderPrPrev();
+  }
+}
+function prMsg(t){document.getElementById('prMsg').textContent=t}
+function renderPrPrev(){
+  document.getElementById('prPrev').innerHTML=prPending.map((p,i)=>'<figure><img src="'+p.thumb+'" alt=""><button type="button" data-rm="'+i+'" aria-label="この画像を外す">×</button></figure>').join('')+(prBusy?'<figure class="busy">縮小中…</figure>':'');
+}
+document.getElementById('prFiles').addEventListener('change',e=>{addFiles(e.target.files);e.target.value=''});
+document.getElementById('prPrev').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(b){prPending.splice(+b.dataset.rm,1);renderPrPrev()}});
+const drop=document.getElementById('prDrop');
+['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+document.addEventListener('paste',e=>{
+  if(document.querySelector('[data-panel="progress"]').hidden)return;
+  const fs=[...(e.clipboardData?.files||[])].filter(f=>f.type.startsWith('image/'));
+  if(fs.length){e.preventDefault();addFiles(fs)}
+});
+document.getElementById('prForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const text=document.getElementById('prText').value.trim();if(!text)return;
+  if(prBusy){prMsg('画像の縮小が終わるまでお待ちください。');return}
+  const btn=document.getElementById('prSubmit');btn.disabled=true;prMsg('提出中…');
+  try{
+    const ref=fsDoc(progCol),now=Date.now(),batch=fsWriteBatch(fbDb);
+    batch.set(ref,{text,phase:document.getElementById('prPhase').value,by:who(),byUid:currentUser.uid,byEmail:currentUser.email||'',createdAt:now,thumbs:prPending.map(p=>p.thumb),n:prPending.length});
+    prPending.forEach((p,i)=>batch.set(progImgRef(ref.id+'_'+i),{pid:ref.id,i,data:p.full,createdAt:now}));
+    await batch.commit();
+    document.getElementById('prText').value='';prPending=[];renderPrPrev();prMsg('提出しました。');
+  }catch(err){fail(err,'提出できませんでした。');prMsg('提出できませんでした。画像を減らすか、もう一度お試しください。')}
+  btn.disabled=false;
+});
+function renderProgress(){
+  const root=document.getElementById('prs');
+  document.getElementById('prWho').textContent=currentUser?who():'–';
+  document.getElementById('prNow').textContent=fmtDT(Date.now());
+  if(!loaded){root.innerHTML='<div class="empty">読み込み中…</div>';return}
+  if(!progress.length){root.innerHTML='<div class="empty">まだ提出はありません。画像とひとことを入れて「提出」を押すと、ここに日付順で並びます。</div>';return}
+  let h='',day='';
+  progress.forEach(p=>{
+    const d=new Date(p.createdAt||0),k=iso(d);
+    if(k!==day){day=k;h+='<div class="pr-day">'+(d.getMonth()+1)+'/'+d.getDate()+'（'+'日月火水木金土'[d.getDay()]+'）</div>'}
+    const ph=PHASES.find(x=>x.id===p.phase), mine=currentUser&&p.byUid===currentUser.uid;
+    h+='<article class="pr" data-id="'+esc(p.id)+'"><div class="pr-h"><b>'+esc(p.by||'')+'</b><span>'+fmtDT(p.createdAt||0)+'</span>'+(ph?'<span class="ph"><i class="ph-mark" style="background:var(--'+ph.c+')"></i>'+ph.name+'</span>':'')+
+      (mine?'<span class="acts"><button type="button" data-act="prdel" class="'+(armed===p.id?'arm':'')+'">'+(armed===p.id?'本当に削除':'削除')+'</button></span>':'')+'</div>'+
+      '<p>'+esc(p.text)+'</p>'+
+      ((p.thumbs||[]).length?'<div class="pr-imgs">'+p.thumbs.map((t,i)=>'<button type="button" data-img="'+i+'" aria-label="画像を拡大"><img src="'+t+'" alt="" loading="lazy"></button>').join('')+'</div>':'')+
+      '</article>';
+  });
+  root.innerHTML=h;
+}
+document.getElementById('prs').addEventListener('click',async e=>{
+  const card=e.target.closest('.pr');if(!card)return;const p=progress.find(x=>x.id===card.dataset.id);if(!p)return;
+  const ib=e.target.closest('[data-img]');
+  if(ib){
+    const i=+ib.dataset.img, lb=document.getElementById('lightbox'), img=document.getElementById('lbImg');
+    img.src=p.thumbs[i];document.getElementById('lbMsg').textContent='読み込み中…';lb.hidden=false;
+    try{const s=await fsGetDoc(progImgRef(p.id+'_'+i));if(s.exists()&&!lb.hidden)img.src=s.data().data;document.getElementById('lbMsg').textContent=(p.by||'')+' ・ '+fmtDT(p.createdAt||0)}catch(err){document.getElementById('lbMsg').textContent='元の画像を読み込めませんでした（縮小版を表示中）'}
+    return;
+  }
+  const b=e.target.closest('[data-act="prdel"]');
+  if(b){
+    if(!arm(p.id,renderProgress))return;
+    try{const batch=fsWriteBatch(fbDb);batch.delete(fsDoc(fbDb,'sotsusei','board','progress',p.id));for(let i=0;i<(p.n||0);i++)batch.delete(progImgRef(p.id+'_'+i));await batch.commit()}catch(err){fail(err)}
+  }
+});
+const lb=document.getElementById('lightbox');
+lb.addEventListener('click',e=>{if(e.target===lb||e.target.closest('.lb-close')){lb.hidden=true;document.getElementById('lbImg').src=''}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!lb.hidden){lb.hidden=true;document.getElementById('lbImg').src=''}});
+
 /* ---------- 掲示板 ---------- */
 function postHTML(p,actions){
   const mine=currentUser&&p.byUid===currentUser.uid;
@@ -1985,7 +2132,7 @@ function renderHomeHero(){
     (ns&&ns!==nx?'<div style="font-size:13.5px;border-top:1px dashed var(--line);padding-top:8px">次の学校の節目：<b>'+ns[1]+'</b> '+fmt(D(ns[0]))+' ・ あと '+diff(D(ns[0]),today)+' 日</div>':'');
 }
 
-function renderAll(){renderHome();renderCal();renderTasks();renderMats();renderPosts();renderDoc();renderDay()}
+function renderAll(){renderHome();renderCal();renderTasks();renderMats();renderPosts();renderDoc();renderDay();renderProgress()}
 drawGantt();renderAll();
 
 // ログインが確認できたら購読を始める
@@ -1993,6 +2140,7 @@ window.startBoard=function(){
   if(unsubs.length)return;
   note('変更は二人の画面に自動で反映されます。');
   seedEventsOnce();
+  unsubs.push(fsOnSnapshot(progCol,s=>{progress=s.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));renderProgress()},err=>console.error(err)));
   unsubs.push(fsOnSnapshot(slotsCol,s=>{slots=s.docs.map(d=>Object.assign({id:d.id},d.data()));renderDay();renderHomeHero()},err=>console.error(err)));
   unsubs.push(fsOnSnapshot(col('daynotes'),s=>{dayNotes={};s.docs.forEach(d=>dayNotes[d.id]=d.data());renderDay()},err=>console.error(err)));
   unsubs.push(fsOnSnapshot(planCol,onPlanSnap,err=>{console.error(err);planLoaded=true;renderDoc()}));
@@ -2007,7 +2155,7 @@ window.startBoard=function(){
 };
 window.stopBoard=function(){
   unsubs.forEach(u=>u());unsubs=[];
-  tasks=[];materials=[];posts=[];events=[];slots=[];dayNotes={};blocks=[];planLoaded=false;planSeedChecked=false;els.clear();docEl.innerHTML="";loaded=false;renderAll();
+  tasks=[];materials=[];posts=[];events=[];slots=[];progress=[];dayNotes={};blocks=[];planLoaded=false;planSeedChecked=false;els.clear();docEl.innerHTML="";loaded=false;renderAll();
 };
 if(currentUser&&allowed)window.startBoard();
 })();
