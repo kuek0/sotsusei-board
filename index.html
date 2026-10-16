@@ -322,6 +322,7 @@ img{max-width:100%}
 .t-detail label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
 .t-detail input[type=text],.t-detail input[type=date],.t-detail textarea,.form input,.form select,.form textarea{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:6px 8px;font:inherit;font-size:13.5px;color:var(--ink);width:100%;min-width:0}
 .t-detail textarea,.form textarea{min-height:64px;resize:vertical}
+.t-detail .t-memo{min-height:140px;line-height:1.7}
 .t-row{display:grid;grid-template-columns:2fr 1fr;gap:10px}
 .subs{display:grid;gap:4px}
 .sub{display:flex;gap:8px;align-items:center;font-size:13.5px}
@@ -1680,15 +1681,16 @@ function renderTasks(){
       const isOpen=open.has(t.id);
       h+='<div class="task '+t.status+'" data-id="'+esc(t.id)+'"><button class="st '+t.status+'" data-act="st" title="クリックで状態を切り替え">'+LABEL[t.status]+'</button>'+
         '<div class="t-main"><div class="t-title">'+esc(t.title)+'</div>'+(t.note?'<div class="t-note">'+esc(t.note)+'</div>':'')+'</div>'+
-        '<div class="meta"><button class="t-toggle" data-act="open" aria-expanded="'+isOpen+'">詳細'+(subs.length?' <span class="prog">'+sd+'/'+subs.length+'</span>':'')+'</button><span class="due mono'+(late?' late':'')+'">'+(t.due?fmt(D(t.due)):'—')+'</span>'+
+        '<div class="meta"><button class="t-toggle" data-act="open" aria-expanded="'+isOpen+'">詳細'+(subs.length?' <span class="prog">'+sd+'/'+subs.length+'</span>':'')+(t.memo?' <span class="prog">・メモ</span>':'')+'</button><span class="due mono'+(late?' late':'')+'">'+(t.due?fmt(D(t.due)):'—')+'</span>'+
         '<select data-act="own" aria-label="担当">'+['both','a','b'].map(k=>'<option value="'+k+'"'+(t.owner===k?' selected':'')+'>'+esc(name(k))+'</option>').join('')+'</select>'+
         '<button class="del'+(armed===t.id?' arm':'')+'" data-act="del">'+(armed===t.id?'本当に削除':'削除')+'</button></div>';
       if(isOpen){
         h+='<div class="t-detail"><div class="t-row"><label>タスク名<input type="text" data-f="title" value="'+esc(t.title)+'" maxlength="120"></label><label>期限<input type="date" data-f="due" value="'+esc(t.due||'')+'"></label></div>'+
-          '<label>メモ<textarea data-f="note" maxlength="1000">'+esc(t.note||'')+'</textarea></label>'+
+          '<label>補足（一覧のタスク名の下に表示）<input type="text" data-f="note" maxlength="200" value="'+esc(t.note||'')+'"></label>'+
           '<div class="subs"><span style="font-size:12px;color:var(--muted)">小タスク</span>'+
           subs.map((s,i)=>'<div class="sub'+(s.done?' done':'')+'"><input type="checkbox" data-sub="'+i+'"'+(s.done?' checked':'')+' aria-label="完了"><span>'+esc(s.t)+'</span><button type="button" data-subdel="'+i+'" aria-label="小タスクを削除">×</button></div>').join('')+
-          '<div class="sub-add"><input type="text" data-subnew placeholder="小タスクを追加（Enter）" maxlength="120"><button type="button" class="btn2" data-act="subadd">追加</button></div></div></div>';
+          '<div class="sub-add"><input type="text" data-subnew placeholder="小タスクを追加（Enter）" maxlength="120"><button type="button" class="btn2" data-act="subadd">追加</button></div></div>'+
+          '<label>メモ（作業の記録・気づいたこと・参考 URL など）<textarea data-f="memo" class="t-memo" maxlength="5000" placeholder="自由に書けます。書いた内容は自動で保存されます">'+esc(t.memo||'')+'</textarea>'+(t.memoAt?'<span class="muted" style="font-size:11.5px">最終更新 '+fmtDT(t.memoAt)+(t.memoBy?'（'+esc(t.memoBy)+'）':'')+'</span>':'')+'</label></div>';
       }
       h+='</div>';
     });
@@ -1719,7 +1721,16 @@ tasksRoot.addEventListener('change',e=>{
   const el=e.target;
   if(el.dataset.act==='own')return patchTask(id,{owner:el.value});
   if(el.dataset.sub!==undefined){const subs=(t.subs||[]).map((s,i)=>i===+el.dataset.sub?{t:s.t,done:el.checked}:s);return patchTask(id,{subs})}
+  if(el.dataset.f==='memo'){clearTimeout(memoTimers.get(id));memoTimers.delete(id);return saveMemo(id,el.value)}
   if(el.dataset.f){const v=el.value.trim();if(el.dataset.f==='title'&&!v){el.value=t.title;return}if((t[el.dataset.f]||'')===v)return;return patchTask(id,{[el.dataset.f]:v})}
+});
+// メモは書いている途中でも少し待って自動保存する
+const memoTimers=new Map();
+function saveMemo(id,val){const t=tasks.find(x=>x.id===id);const v=val.replace(/\s+$/,'');if(!t||(t.memo||'')===v)return;return patchTask(id,{memo:v,memoAt:Date.now(),memoBy:who()})}
+tasksRoot.addEventListener('input',e=>{
+  if(e.target.dataset.f!=='memo')return;
+  const id=e.target.closest('.task').dataset.id,el=e.target;
+  clearTimeout(memoTimers.get(id));memoTimers.set(id,setTimeout(()=>{memoTimers.delete(id);saveMemo(id,el.value)},1200));
 });
 tasksRoot.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('[data-subnew]')){e.preventDefault();addSub(e.target.closest('.task').dataset.id,e.target)}});
 document.getElementById('fOwner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st.owner=b.dataset.v;document.querySelectorAll('#fOwner button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderTasks()});
