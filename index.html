@@ -323,6 +323,7 @@ img{max-width:100%}
 .t-detail input[type=text],.t-detail input[type=date],.t-detail textarea,.form input,.form select,.form textarea{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:6px 8px;font:inherit;font-size:13.5px;color:var(--ink);width:100%;min-width:0}
 .t-detail textarea,.form textarea{min-height:64px;resize:vertical}
 .t-detail .t-memo{min-height:140px;line-height:1.7}
+.ph-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--muted);background:var(--soft);padding:0 6px;margin-right:8px;vertical-align:2px}.phase.overdue h3{color:var(--high)}
 .t-row{display:grid;grid-template-columns:2fr 1fr;gap:10px}
 .subs{display:grid;gap:4px}
 .sub{display:flex;gap:8px;align-items:center;font-size:13.5px}
@@ -698,6 +699,7 @@ input:not([type=checkbox]):not([type=file]),select,textarea{border:0!important;b
     <div class="seg" role="group" aria-label="担当で絞り込み" id="fOwner">
       <button data-v="all" aria-pressed="true">全員</button><button data-v="a" aria-pressed="false">A</button><button data-v="b" aria-pressed="false">B</button>
     </div>
+    <div class="seg" role="group" aria-label="並べ方" id="fSort"><button data-v="due" aria-pressed="true">締切順</button><button data-v="phase" aria-pressed="false">工程ごと</button></div>
     <label><input type="checkbox" id="fHide"> 完了を隠す</label>
     <span class="notice" id="dbNote">読み込み中…</span>
   </div>
@@ -1176,7 +1178,7 @@ showTab(location.hash.slice(1));
 const np=document.getElementById('np');
 np.innerHTML=PHASES.map(p=>'<option value="'+p.id+'">'+p.name+'</option>').join('');
 let tasks=[],loaded=false,members={a:'',b:''},materials=[],posts=[],events=[],unsubs=[];
-const st={owner:'all',hide:false};
+const st={owner:'all',hide:false,sort:'due'};
 const LABEL={todo:'未着手',doing:'作業中',done:'完了'};
 const NEXT={todo:'doing',doing:'done',done:'todo'};
 const name=k=>k==='a'?(members.a||'A'):k==='b'?(members.b||'B'):'両方';
@@ -1662,6 +1664,38 @@ async function migratePlanV2(){
 const open=new Set();
 let pendingRender=false;
 const tasksRoot=document.getElementById('tasks');
+// 工程の短い名前（締切順の一覧で、各タスクの横に出す）
+const PH_SHORT={ph1:'準備',ph8:'受け渡し',ph2:'Maya',ph3:'MD',ph4:'ZBrush',ph5:'出力',ph7:'VRM',ph6:'報告'};
+function taskRow(t,showPhase){
+  const late=t.status!=='done'&&t.due&&D(t.due)<today;
+  const subs=Array.isArray(t.subs)?t.subs:[];const sd=subs.filter(s=>s.done).length;
+  const isOpen=open.has(t.id), p=phaseOf(t.phase);
+  let h='<div class="task '+t.status+'" data-id="'+esc(t.id)+'"><button class="st '+t.status+'" data-act="st" title="クリックで状態を切り替え">'+LABEL[t.status]+'</button>'+
+    '<div class="t-main"><div class="t-title">'+(showPhase?'<span class="ph-chip"><i class="ph-mark" style="background:var(--'+p.c+')"></i>'+(PH_SHORT[t.phase]||'')+'</span>':'')+esc(t.title)+'</div>'+(t.note?'<div class="t-note">'+esc(t.note)+'</div>':'')+'</div>'+
+    '<div class="meta"><button class="t-toggle" data-act="open" aria-expanded="'+isOpen+'">詳細'+(subs.length?' <span class="prog">'+sd+'/'+subs.length+'</span>':'')+(t.memo?' <span class="prog">・メモ</span>':'')+'</button><span class="due mono'+(late?' late':'')+'">'+(t.due?fmt(D(t.due)):'—')+'</span>'+
+    '<select data-act="own" aria-label="担当">'+['both','a','b'].map(k=>'<option value="'+k+'"'+(t.owner===k?' selected':'')+'>'+esc(name(k))+'</option>').join('')+'</select>'+
+    '<button class="del'+(armed===t.id?' arm':'')+'" data-act="del">'+(armed===t.id?'本当に削除':'削除')+'</button></div>';
+  if(isOpen){
+    h+='<div class="t-detail"><div class="t-row"><label>タスク名<input type="text" data-f="title" value="'+esc(t.title)+'" maxlength="120"></label><label>期限<input type="date" data-f="due" value="'+esc(t.due||'')+'"></label></div>'+
+      '<label>工程<select data-f="phase">'+PHASES.map(x=>'<option value="'+x.id+'"'+(t.phase===x.id?' selected':'')+'>'+x.name+'</option>').join('')+'</select></label>'+
+      '<label>補足（一覧のタスク名の下に表示）<input type="text" data-f="note" maxlength="200" value="'+esc(t.note||'')+'"></label>'+
+      '<div class="subs"><span style="font-size:12px;color:var(--muted)">小タスク</span>'+
+      subs.map((s,i)=>'<div class="sub'+(s.done?' done':'')+'"><input type="checkbox" data-sub="'+i+'"'+(s.done?' checked':'')+' aria-label="完了"><span>'+esc(s.t)+'</span><button type="button" data-subdel="'+i+'" aria-label="小タスクを削除">×</button></div>').join('')+
+      '<div class="sub-add"><input type="text" data-subnew placeholder="小タスクを追加（Enter）" maxlength="120"><button type="button" class="btn2" data-act="subadd">追加</button></div></div>'+
+      '<label>メモ（作業の記録・気づいたこと・参考 URL など）<textarea data-f="memo" class="t-memo" maxlength="5000" placeholder="自由に書けます。書いた内容は自動で保存されます">'+esc(t.memo||'')+'</textarea>'+(t.memoAt?'<span class="muted" style="font-size:11.5px">最終更新 '+fmtDT(t.memoAt)+(t.memoBy?'（'+esc(t.memoBy)+'）':'')+'</span>':'')+'</label></div>';
+  }
+  return h+'</div>';
+}
+const byDue=(a,b)=>(a.due||'9')<(b.due||'9')?-1:(a.due||'9')>(b.due||'9')?1:(a.order||0)-(b.order||0);
+// 締切順の区切り：期限切れ・今日・7 日以内・それ以降は月ごと・期限なし
+function dueGroup(t){
+  if(!t.due)return ['~','期限なし'];
+  const n=diff(D(t.due),today);
+  if(n<0&&t.status!=='done')return ['0','期限切れ'];
+  if(n===0)return ['1','今日'];
+  if(n>0&&n<=7)return ['2','7 日以内'];
+  const d=D(t.due);return ['3'+t.due.slice(0,7),d.getFullYear()+'年 '+(d.getMonth()+1)+'月'];
+}
 function renderTasks(){
   const a=document.activeElement;
   if(a&&tasksRoot.contains(a)&&(a.tagName==='TEXTAREA'||(a.tagName==='INPUT'&&a.type!=='checkbox'))){pendingRender=true;return}
@@ -1670,32 +1704,21 @@ function renderTasks(){
   if(!loaded){tasksRoot.innerHTML='<div class="empty">タスクを読み込んでいます…</div>';return}
   const vis=tasks.filter(t=>(st.owner==='all'||t.owner===st.owner||t.owner==='both')&&(!st.hide||t.status!=='done'));
   let h='';
-  PHASES.forEach(p=>{
-    const list=vis.filter(t=>t.phase===p.id).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:(a.due||'9')>(b.due||'9')?1:(a.order||0)-(b.order||0));
-    const all=tasks.filter(t=>t.phase===p.id);const dn=all.filter(t=>t.status==='done').length;
-    h+='<div class="phase"><h3><span class="ph-mark" style="background:var(--'+p.c+')"></span>'+p.name+' <small>'+p.span+' ・ '+dn+'/'+all.length+'</small></h3>';
-    if(!list.length)h+='<div class="empty">'+(all.length?'絞り込み条件に合うタスクはありません。':'まだタスクがありません。下のフォームから追加できます。')+'</div>';
-    list.forEach(t=>{
-      const late=t.status!=='done'&&t.due&&D(t.due)<today;
-      const subs=Array.isArray(t.subs)?t.subs:[];const sd=subs.filter(s=>s.done).length;
-      const isOpen=open.has(t.id);
-      h+='<div class="task '+t.status+'" data-id="'+esc(t.id)+'"><button class="st '+t.status+'" data-act="st" title="クリックで状態を切り替え">'+LABEL[t.status]+'</button>'+
-        '<div class="t-main"><div class="t-title">'+esc(t.title)+'</div>'+(t.note?'<div class="t-note">'+esc(t.note)+'</div>':'')+'</div>'+
-        '<div class="meta"><button class="t-toggle" data-act="open" aria-expanded="'+isOpen+'">詳細'+(subs.length?' <span class="prog">'+sd+'/'+subs.length+'</span>':'')+(t.memo?' <span class="prog">・メモ</span>':'')+'</button><span class="due mono'+(late?' late':'')+'">'+(t.due?fmt(D(t.due)):'—')+'</span>'+
-        '<select data-act="own" aria-label="担当">'+['both','a','b'].map(k=>'<option value="'+k+'"'+(t.owner===k?' selected':'')+'>'+esc(name(k))+'</option>').join('')+'</select>'+
-        '<button class="del'+(armed===t.id?' arm':'')+'" data-act="del">'+(armed===t.id?'本当に削除':'削除')+'</button></div>';
-      if(isOpen){
-        h+='<div class="t-detail"><div class="t-row"><label>タスク名<input type="text" data-f="title" value="'+esc(t.title)+'" maxlength="120"></label><label>期限<input type="date" data-f="due" value="'+esc(t.due||'')+'"></label></div>'+
-          '<label>補足（一覧のタスク名の下に表示）<input type="text" data-f="note" maxlength="200" value="'+esc(t.note||'')+'"></label>'+
-          '<div class="subs"><span style="font-size:12px;color:var(--muted)">小タスク</span>'+
-          subs.map((s,i)=>'<div class="sub'+(s.done?' done':'')+'"><input type="checkbox" data-sub="'+i+'"'+(s.done?' checked':'')+' aria-label="完了"><span>'+esc(s.t)+'</span><button type="button" data-subdel="'+i+'" aria-label="小タスクを削除">×</button></div>').join('')+
-          '<div class="sub-add"><input type="text" data-subnew placeholder="小タスクを追加（Enter）" maxlength="120"><button type="button" class="btn2" data-act="subadd">追加</button></div></div>'+
-          '<label>メモ（作業の記録・気づいたこと・参考 URL など）<textarea data-f="memo" class="t-memo" maxlength="5000" placeholder="自由に書けます。書いた内容は自動で保存されます">'+esc(t.memo||'')+'</textarea>'+(t.memoAt?'<span class="muted" style="font-size:11.5px">最終更新 '+fmtDT(t.memoAt)+(t.memoBy?'（'+esc(t.memoBy)+'）':'')+'</span>':'')+'</label></div>';
-      }
-      h+='</div>';
+  if(st.sort==='due'){
+    const groups=new Map();
+    [...vis].sort(byDue).forEach(t=>{const [k,l]=dueGroup(t);if(!groups.has(k))groups.set(k,{l,list:[]});groups.get(k).list.push(t)});
+    [...groups.keys()].sort().forEach(k=>{const g=groups.get(k),dn=g.list.filter(t=>t.status==='done').length;
+      h+='<div class="phase'+(k==='0'?' overdue':'')+'"><h3>'+g.l+' <small>'+dn+'/'+g.list.length+'</small></h3>'+g.list.map(t=>taskRow(t,true)).join('')+'</div>'});
+    if(!vis.length)h='<div class="empty">'+(tasks.length?'絞り込み条件に合うタスクはありません。':'まだタスクがありません。下のフォームから追加できます。')+'</div>';
+  }else{
+    PHASES.forEach(p=>{
+      const list=vis.filter(t=>t.phase===p.id).sort(byDue);
+      const all=tasks.filter(t=>t.phase===p.id);const dn=all.filter(t=>t.status==='done').length;
+      h+='<div class="phase"><h3><span class="ph-mark" style="background:var(--'+p.c+')"></span>'+p.name+' <small>'+p.span+' ・ '+dn+'/'+all.length+'</small></h3>';
+      if(!list.length)h+='<div class="empty">'+(all.length?'絞り込み条件に合うタスクはありません。':'まだタスクがありません。下のフォームから追加できます。')+'</div>';
+      h+=list.map(t=>taskRow(t,false)).join('')+'</div>';
     });
-    h+='</div>';
-  });
+  }
   tasksRoot.innerHTML=h;
 }
 tasksRoot.addEventListener('focusout',()=>{if(pendingRender)setTimeout(renderTasks,0)});
@@ -1734,6 +1757,8 @@ tasksRoot.addEventListener('input',e=>{
 });
 tasksRoot.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('[data-subnew]')){e.preventDefault();addSub(e.target.closest('.task').dataset.id,e.target)}});
 document.getElementById('fOwner').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st.owner=b.dataset.v;document.querySelectorAll('#fOwner button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderTasks()});
+document.getElementById('fSort').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st.sort=b.dataset.v;document.querySelectorAll('#fSort button').forEach(x=>x.setAttribute('aria-pressed',x===b));try{localStorage.setItem('taskSort',st.sort)}catch(_){};renderTasks()});
+try{const s=localStorage.getItem('taskSort');if(s==='phase'){st.sort='phase';document.querySelectorAll('#fSort button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v==='phase'))}}catch(_){}
 document.getElementById('fHide').addEventListener('change',e=>{st.hide=e.target.checked;try{localStorage.setItem('hideDone',st.hide?'1':'')}catch(_){};renderTasks()});
 try{if(localStorage.getItem('hideDone')){st.hide=true;document.getElementById('fHide').checked=true}}catch(_){}
 
